@@ -129,3 +129,26 @@ export function getResolution(resolution) {
   }
   return timeframe;
 }
+
+export function getNextMinuteBarTime(barTime) {
+  const date = new Date(barTime); // barTime is in milliseconds
+  date.setMinutes(date.getMinutes() + 1); // Add one minute
+  return date.getTime(); // Return in milliseconds
+}
+
+
+export const getLatestEndDate = () => {
+  const now = new Date();
+
+  const marketOpen = new Date(now);
+  marketOpen.setUTCHours(13, 30, 0, 0); // 9:30 AM ET in UTC
+
+  const marketClose = new Date(now);
+  marketClose.setUTCHours(20, 0, 0, 0); // 4:00 PM ET in UTC
+
+  if (now >= marketOpen && now <= marketClose) {
+    return now.toISOString(); // Current time within market hours
+  } else {
+    return marketClose.toISOString(); // Last market close time
+  }
+};

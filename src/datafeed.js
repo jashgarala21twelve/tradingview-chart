@@ -7,6 +7,7 @@ import {
   makeAlpacaMarketApiRequest,
   fetchAllHistoricalAlpacaData,
   getResolution,
+  getLatestEndDate,
 } from "./helpers.js";
 import { subscribeOnStream, unsubscribeFromStream } from "./streaming.js";
 
@@ -301,7 +302,9 @@ export default {
     let allBars = [];
     let nextPageToken = null;
     const start = "2024-01-01T00:00:00Z";
-    const end = "2024-07-18T12:53:30Z";
+    const end = "2024-07-18T23:59:59Z";
+    // const end = getLatestEndDate();
+
     const fetchBars = async (pageToken = null) => {
       const timeframe = getResolution(resolution);
       // console.log("timeframe", timeframe);
@@ -353,6 +356,7 @@ export default {
           if (firstDataRequest) {
             lastBarsCache.set(symbolInfo.name, {
               ...allBars[allBars.length - 1],
+              time: new Date().getTime(),
             });
           }
           isNextPageToken = false;
@@ -389,6 +393,7 @@ export default {
       onResetCacheNeededCallback,
       lastBarsCache.get(symbolInfo.name)
     );
+    
   },
 
   unsubscribeBars: (subscriberUID) => {

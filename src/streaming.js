@@ -1,5 +1,5 @@
 import { ALPACA_API_KEY, ALPACA_SECRET_KEY } from "./constant.js";
-import { parseFullSymbol, apiKey } from "./helpers.js";
+import { parseFullSymbol, apiKey, getNextMinuteBarTime } from "./helpers.js";
 
 // const socket = new WebSocket(
 //   "ws://127.0.0.1:5229/a1d81405-ccb3-46d3-8f0c-ce2281864c9c"
@@ -80,7 +80,8 @@ import { parseFullSymbol, apiKey } from "./helpers.js";
 //   subscriptionItem.handlers.forEach((handler) => handler.callback(bar));
 // });
 // http://prospuh.io:2001
-const socket = io("http://prospuh.io:2001");
+
+const socket = io("http://localhost:5000");
 const channelToSubscription = new Map();
 
 socket.on("connect", () => {
@@ -89,33 +90,34 @@ socket.on("connect", () => {
 });
 socket.on("subscribe_trades", (data) => {
   // console.log("[subscribe_daily_bars] data", data);
-  const {
-    symbol,
-    symbol_identity,
-    openPrice,
-    closePrice,
-    highPrice,
-    lowPrice,
-    volume,
-    price: tP,
-    timestamp,
-  } = data;
-  // console.log("data", data);
+  // subscribe_trades
+  const { symbol, price: tP, timestamp } = data;
+  console.log("data", data);
+  // const tradePrice = parseFloat(tP);
+  // const date = new Date(timestamp);
+  // const unixTimeInSeconds = Math.floor(date / 1000);
+  // const tradeTime = unixTimeInSeconds;
   const tradePrice = parseFloat(tP);
-  // const tradeTime = parseInt(timestamp);
-  const date = new Date(timestamp);
-  const unixTime = date.getTime();
-  const tradeTime = unixTime;
+  // const date = new Date(timestamp);
+  const tradeTime = timestamp;
   let subscriptionItem = channelToSubscription.get(symbol);
   const lastDailyBar = subscriptionItem?.lastDailyBar;
-  const nextDailyBarTime = getNextDailyBarTime(lastDailyBar.time);
+  const nextDailyBarTime = getNextMinuteBarTime(lastDailyBar.time);
+  const formatTime = (timeInMs) => new Date(timeInMs).toISOString();
+
   console.log({
+    subscriptionItem,
     tradeTime,
-    lastDailyBar,
+    tradeTimeReadable: formatTime(tradeTime),
+    lastDailyBarTime: lastDailyBar?.time,
+    lastDailyBarTimeReadable: lastDailyBar
+      ? formatTime(lastDailyBar.time)
+      : "N/A",
     nextDailyBarTime,
+    nextMinuteBarTimeReadable: formatTime(nextDailyBarTime),
   });
   let bar;
-
+  console.log(tradeTime >= nextDailyBarTime, "IsNewBar");
   if (tradeTime >= nextDailyBarTime) {
     bar = {
       time: nextDailyBarTime,
@@ -124,7 +126,7 @@ socket.on("subscribe_trades", (data) => {
       low: tradePrice,
       close: tradePrice,
     };
-    // console.log("[socket.io] Generate new bar", bar);
+    console.log("[socket.io] Generate new bar", bar);
   } else {
     bar = {
       ...lastDailyBar,
@@ -132,7 +134,7 @@ socket.on("subscribe_trades", (data) => {
       low: Math.min(lastDailyBar.low, tradePrice),
       close: tradePrice,
     };
-    // console.log("[socket.io] Update the latest bar by price", tradePrice);
+    console.log("[socket.io] Update the latest bar by price", tradePrice);
   }
 
   subscriptionItem.lastDailyBar = bar;
@@ -202,11 +204,18 @@ socket.on("message", (data) => {
   //   // Send data to every subscriber of that symbol
   subscriptionItem.handlers.forEach((handler) => handler.callback(bar));
 });
-function getNextDailyBarTime(barTime) {
-  const date = new Date(barTime * 1000);
-  date.setDate(date.getDate() + 1);
-  return date.getTime() / 1000;
-}
+// function getNextDailyBarTime(barTime) {
+//   const date = new Date(barTime);
+//   date.setDate(date.getDate() + 1);
+
+//   return date.getTime();
+// }
+
+// function getNextDailyBarTime(barTime) {
+//   const date = new Date(barTime * 1000);
+//   date.setDate(date.getDate() + 1);
+//   return date.getTime() / 1000;
+// }
 
 export function subscribeOnStream(
   symbolInfo,
@@ -248,6 +257,7 @@ export function subscribeOnStream(
     channelString
   );
   socket.emit("subscribe", { type: "trades", symbol: symbolInfo.name });
+  // socket.emit("subscribe", { type: "bars", symbol: symbolInfo.name });
 
   // const subRequest = {
   //   action: "SubAdd",
