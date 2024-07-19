@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TradingView Advanced Charts example</title>
+
+    <!-- The script that loads Advanced Charts -->
+    <script
+      type="text/javascript"
+      src="charting_library/charting_library.js"
+    ></script>
+
+    <!-- Custom datafeed module -->
+    <script type="module" src="src/main.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"
+      integrity="sha512-v8ng/uGxkge3d1IJuEo6dJP8JViyvms0cly9pnbfRxT6/31c3dRWxIiwGnMSWwZjHKOuY3EVmijs7k1jz/9bLA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body style="margin: 0px">
+    <!-- A container for the library widget -->
+    <div id="tv_chart_container"></div>
+  </body>
+</html>
