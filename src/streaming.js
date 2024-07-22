@@ -86,7 +86,7 @@ import {
 // });
 // http://prospuh.io:2001
 
-const socket = io("http://localhost:5000");
+const socket = io("http://prospuh.io:2001");
 const channelToSubscription = new Map();
 
 socket.on("connect", () => {
@@ -98,14 +98,14 @@ socket.on("subscribe_trades", (data) => {
   // subscribe_trades
   const { symbol, price: tP, timestamp } = data;
   console.log("data", data);
-  // const tradePrice = parseFloat(tP);
-  // const date = new Date(timestamp);
+  const date = new Date(timestamp).getTime();
   // const unixTimeInSeconds = Math.floor(date / 1000);
   // const tradeTime = unixTimeInSeconds;
+  const tradeTime = date;
   const tradePrice = parseFloat(tP);
   // const date = new Date(timestamp);
-  const tradeTime = timestamp;
-  console.log("tradeTime", tradeTime);
+  // const tradeTime = timestamp;
+  // console.log("tradeTime", tradeTime);
   let subscriptionItem = channelToSubscription.get(symbol);
 
   let currentTimeFrame = subscriptionItem?.resolution;

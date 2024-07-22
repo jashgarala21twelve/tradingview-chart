@@ -77,6 +77,12 @@ export const fetchAllHistoricalAlpacaData = async (baseUrl) => {
   return allAlpacaData;
 };
 
+export const getLatestBar = async (symbol) => {
+  let API_URL = `stocks/${symbol}/bars/latest`;
+  const data = await makeAlpacaMarketApiRequest("get", API_URL);
+  return data;
+};
+
 // Generates a symbol ID from a pair of the coins
 export function generateSymbol(exchange, fromSymbol, toSymbol) {
   const short = `${fromSymbol}/${toSymbol}`;
@@ -107,7 +113,7 @@ export function getNextMinuteBarTime(barTime) {
 }
 
 export function getNextBarTime(time, timeframe) {
-  console.log("timeframe",timeframe)
+
   const date = new Date(time); // time is in milliseconds
   switch (timeframe) {
     case SUPPORTED_RESOLUTIONS_VALUES._1MINUTE:
@@ -145,4 +151,11 @@ export function getNextBarTime(time, timeframe) {
   }
 
   return date.getTime(); // Return in milliseconds
+}
+
+export function getLatestEndDateForGraph() {
+  const date = new Date();
+  // Subtract 15 minutes
+  date.setMinutes(date.getMinutes() - 15);
+  return date.toISOString();
 }

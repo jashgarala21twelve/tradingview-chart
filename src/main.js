@@ -10,8 +10,11 @@ window.tvWidget = new TradingView.widget({
   datafeed: Datafeed,
   library_path: "../charting_library/",
   disabled_features: ["header_symbol_search", "symbol_search_hot_key"],
+  overrides: {
+    "mainSeriesProperties.showCountdown": true, // Show countdown
+  },
+  theme: "light",
   // debug: true,
-
 });
 
 window.tvWidget.onChartReady(function () {

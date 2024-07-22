@@ -8,6 +8,8 @@ import {
   makeApiRequest,
   generateSymbol,
   makeAlpacaBrokerApiRequest,
+  getLatestEndDateForGraph,
+  getLatestBar,
 } from "./helpers.js";
 import { subscribeOnStream, unsubscribeFromStream } from "./streaming.js";
 
@@ -162,14 +164,15 @@ export default {
       type: symbolItem.type,
       session: "0930-1600", // Regular market hours
       timezone: "America/New_York",
-
+      // session: "24x7",
+      // timezone: "Etc/UTC",
       // session: "0915-1530", // Indian market hours
       // timezone: "Asia/Kolkata",
       exchange: symbolItem.exchange,
       minmov: 1,
       pricescale: 100,
       has_intraday: true,
-      has_no_volume: true,
+      // has_no_volume: true,
       has_weekly_and_monthly: true,
       supported_resolutions: configurationData.supported_resolutions,
       volume_precision: 2,
@@ -181,14 +184,6 @@ export default {
     onSymbolResolvedCallback(symbolInfo);
   },
 
-  /**
-   * 
-   * @param {*} symbolInfo 
-   * @param {*} resolution 
-   * @param {*} periodParams 
-   * @param {*} onHistoryCallback 
-   * @param {*} onErrorCallback 
-
   getBars: async (
     symbolInfo,
     resolution,
@@ -196,117 +191,20 @@ export default {
     onHistoryCallback,
     onErrorCallback
   ) => {
-    const { from, to, firstDataRequest } = periodParams;
-    console.log("[getBars]: Method call", symbolInfo, resolution, from, to);
-    // const parsedSymbol = parseFullSymbol(symbolInfo.full_name);
-
-    // const urlParameters = {
-    //   e: parsedSymbol.exchange,
-    //   fsym: parsedSymbol.fromSymbol,
-    //   tsym: parsedSymbol.toSymbol,
-    //   toTs: to,
-    //   limit: 2000,
-    // };
-    // const query = Object.keys(urlParameters)
-    //   .map((name) => `${name}=${encodeURIComponent(urlParameters[name])}`)
-    //   .join("&");
-    try {
-      // const data = await makeApiRequest(`data/histoday?${query}`);
-      // const start = new Date(from * 1000).toISOString();
-      // const end = new Date(to * 1000).toISOString();
-
-      const start = "2023-01-01T00:00:00Z";
-      const end = "2023-12-31T00:00:00Z";
-      const timeframe = "6hour";
-      const API_URL = `stocks/${symbolInfo.name}/bars?start=${start}&end=${end}&timeframe=${timeframe}&limit=1000`;
-      const data = await fetchAllHistoricalAlpacaData(API_URL);
-      const bars = data.map((bar) => {
-        return {
-          time: new Date(bar.t).getTime(),
-          low: bar.l,
-          high: bar.h,
-          open: bar.o,
-          close: bar.c,
-        };
-      });
-      console.log("bars", bars);
-      // console.log("firstDataRequest", firstDataRequest);
-      if (firstDataRequest) {
-        lastBarsCache.set(symbolInfo.name, {
-          ...bars[bars.length - 1],
-        });
-      }
-
-      // console.log(`[getBars]: returned ${bars.length} bar(s)`);
-      // console.log("Bars", bars);
-      // if (firstDataRequest) {
-      //   lastBarsCache.set(symbolInfo.full_name, {
-      //     ...bars[bars.length - 1],
-      //   });
-      // }
-      // console.log("data.length",data.length)
-      // onHistoryCallback(bars);
-      if (data.length < 1) {
-        onHistoryCallback([], { noData: true });
-      } else {
-        onHistoryCallback(bars, { noData: false });
-      }
-
-      // if (
-      //   (data.Response && data.Response === "Error") ||
-      //   data.Data.length === 0
-      // ) {
-      //   // "noData" should be set if there is no data in the requested period
-      //   onHistoryCallback([], {
-      //     noData: true,
-      //   });
-      //   return;
-      // }
-      // let bars = [];
-      // data.Data.forEach((bar) => {
-      //   if (bar.time >= from && bar.time < to) {
-      //     b`ars = [
-      //       ...bars,
-      //       {
-      //         time: bar.time * 1000,
-      //         low: bar.low,
-      //         high: bar.high,
-      //         open: bar.open,
-      //         close: bar.close,
-      //       },
-      //     ];
-      //   }
-      // });
-      // if (firstDataRequest) {
-      //   lastBarsCache.set(symbolInfo.full_name, {
-      //     ...bars[bars.length - 1],
-      //   });
-      // }
-      // console.log(`[getBars]: returned ${bars.length} bar(s)`);
-      // // console.log("Bars", bars);
-      // onHistoryCallback(bars, {
-      //   noData: false,
-      // });
-    } catch (error) {
-      console.log("[getBars]: Get error", error);
-      onErrorCallback(error);
-    }
-  },
-   */
-  getBars: async (
-    symbolInfo,
-    resolution,
-    periodParams,
-    onHistoryCallback,
-    onErrorCallback
-  ) => {
-    const { from, to, firstDataRequest } = periodParams;
-    console.log("[getBars]: Method call", symbolInfo, resolution, from, to);
+    const { from, to, firstDataRequest, countBack } = periodParams;
+    console.log(
+      "[getBars]: Method call",
+      symbolInfo,
+      resolution,
+      from,
+      to,
+      countBack
+    );
     let allBars = [];
     let nextPageToken = null;
     // const start = "2024-01-01T00:00:00Z";
     const start = "2024-06-01T00:00:00Z";
-    const end = "2024-07-20T14:48:46.74422598Z";
+    const end = getLatestEndDateForGraph();
     // const end = getLatestEndDate();
 
     const fetchBars = async (pageToken = null) => {
@@ -354,8 +252,15 @@ export default {
           await fetchBars(nextPageToken);
         } else {
           if (firstDataRequest) {
+            // const latestBarData = await getLatestBar(symbolInfo.name);
+            // const latestBar = latestBarData?.bar;
             lastBarsCache.set(symbolInfo.name, {
               ...allBars[allBars.length - 1],
+              // low: latestBar.l,
+              // high: latestBar.h,
+              // open: latestBar.o,
+              // close: latestBar.c,
+              // volume: latestBar.v, // Add volume if available
               // time: new Date().getTime(),
             });
           }
@@ -372,6 +277,92 @@ export default {
 
     await fetchBars();
   },
+  // getBars: async (
+  //   symbolInfo,
+  //   resolution,
+  //   periodParams,
+  //   onHistoryCallback,
+  //   onErrorCallback
+  // ) => {
+  //   const { from, to, firstDataRequest, countBack } = periodParams;
+  //   console.log(
+  //     "[getBars]: Method call",
+  //     symbolInfo,
+  //     resolution,
+  //     from,
+  //     to,
+  //     countBack
+  //   );
+  //   const fromDate = new Date(from * 1000);
+  //   const toDate = new Date(to * 1000);
+
+  //   // Convert to readable format
+  //   const start = fromDate.toISOString();
+  //   let end;
+  //   if (firstDataRequest) {
+  //     end = "2024-07-20T14:48:00Z";
+  //   } else {
+  //     end = toDate.toISOString();
+  //   }
+
+  //   console.log("start", start);
+  //   console.log("end", end);
+
+  //   let allBars = [];
+  //   let nextPageToken = null;
+  //   // const start = "2024-01-01T00:00:00Z";
+  //   // const start = "2024-06-01T00:00:00Z";
+  //   // const end = "2024-07-20T14:48:00Z";
+  //   // const end = getLatestEndDate();
+
+  //   const fetchBars = async (pageToken = null) => {
+  //     const timeframe = TRADING_VIEW_RESOLUTION_TO_ALPACA[resolution];
+  //     const encodedSymbol = encodeURIComponent(symbolInfo.name);
+  //     const MARKET_URL = ALPACA_API_URL.MARKET;
+  //     let API_URL = `${MARKET_URL}/v2/stocks/${encodedSymbol}/bars?start=${start}&end=${end}&timeframe=${timeframe}&limit=1000`;
+
+  //     try {
+  //       const response = await fetch(API_URL, {
+  //         headers: {
+  //           Authorization: ALPACA_AUTH_TOKEN,
+  //         },
+  //       });
+  //       const data = await response.json();
+
+  //       if (!response.ok || !data.bars || data.bars.length === 0) {
+  //         onHistoryCallback([], {
+  //           noData: true,
+  //         });
+  //         return;
+  //       }
+
+  //       const bars = data.bars.map((bar) => ({
+  //         time: new Date(bar.t).getTime(),
+  //         low: bar.l,
+  //         high: bar.h,
+  //         open: bar.o,
+  //         close: bar.c,
+  //         volume: bar.v, // Add volume if available
+  //       }));
+  //       onHistoryCallback(bars, {
+  //         noData: false,
+  //       });
+  //       if (firstDataRequest) {
+  //         lastBarsCache.set(symbolInfo.name, {
+  //           ...bars[bars.length - 1],
+  //           time: new Date().getTime(),
+  //         });
+  //       }
+  //       console.log("[Bars length]:", allBars.length);
+  //     } catch (error) {
+  //       console.log("error", error.message);
+  //       console.log("[getBars]: Get error", error);
+  //       onErrorCallback(error);
+  //     }
+  //   };
+
+  //   await fetchBars();
+  // },
 
   subscribeBars: (
     symbolInfo,
