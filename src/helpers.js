@@ -1,4 +1,8 @@
-import { ALPACA_API_URL, ALPACA_AUTH_TOKEN } from "./constant.js";
+import {
+  ALPACA_API_URL,
+  ALPACA_AUTH_TOKEN,
+  SUPPORTED_RESOLUTIONS_VALUES,
+} from "./constant.js";
 
 // Get a CryptoCompare API key CryptoCompare https://www.cryptocompare.com/coins/guides/how-to-use-our-api/
 export const apiKey =
@@ -96,59 +100,49 @@ export function parseFullSymbol(fullSymbol) {
   };
 }
 
-export function getResolution(resolution) {
-  let timeframe;
-  switch (resolution) {
-    case "60":
-      timeframe = "1hour";
-      break;
-    case "1":
-      timeframe = "1min";
-      break;
-    case "15":
-      timeframe = "15min";
-      break;
-    case "30":
-      timeframe = "30min";
-      break;
-    case "1D":
-      timeframe = "1day";
-      break;
-    case "360":
-      timeframe = "6hour";
-      break;
-    case "1W":
-      timeframe = "1week";
-      break;
-    case "2W":
-      timeframe = "2week";
-      break;
-    case "1M":
-      timeframe = "1month";
-      break;
-  }
-  return timeframe;
-}
-
 export function getNextMinuteBarTime(barTime) {
   const date = new Date(barTime); // barTime is in milliseconds
   date.setMinutes(date.getMinutes() + 1); // Add one minute
   return date.getTime(); // Return in milliseconds
 }
 
-
-export const getLatestEndDate = () => {
-  const now = new Date();
-
-  const marketOpen = new Date(now);
-  marketOpen.setUTCHours(13, 30, 0, 0); // 9:30 AM ET in UTC
-
-  const marketClose = new Date(now);
-  marketClose.setUTCHours(20, 0, 0, 0); // 4:00 PM ET in UTC
-
-  if (now >= marketOpen && now <= marketClose) {
-    return now.toISOString(); // Current time within market hours
-  } else {
-    return marketClose.toISOString(); // Last market close time
+export function getNextBarTime(time, timeframe) {
+  console.log("timeframe",timeframe)
+  const date = new Date(time); // time is in milliseconds
+  switch (timeframe) {
+    case SUPPORTED_RESOLUTIONS_VALUES._1MINUTE:
+      date.setMinutes(date.getMinutes() + 1);
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._2MINUTE:
+      date.setMinutes(date.getMinutes() + 2);
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._15MINUTE:
+      date.setMinutes(date.getMinutes() + 15);
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._30MINUTE:
+      date.setMinutes(date.getMinutes() + 30);
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._60MINUTE:
+      date.setHours(date.getHours() + 1);
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._6HOURS:
+      date.setHours(date.getHours() + 6);
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._1DAY:
+      date.setDate(date.getDate() + 1);
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._1WEEK:
+      date.setDate(date.getDate() + 7);
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._2WEEK:
+      date.setDate(date.getDate() + 14);
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._1MONTH:
+      date.setMonth(date.getMonth() + 1);
+      break;
+    default:
+      throw new Error("Unsupported timeframe");
   }
-};
+
+  return date.getTime(); // Return in milliseconds
+}

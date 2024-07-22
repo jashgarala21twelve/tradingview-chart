@@ -1,13 +1,13 @@
-import { ALPACA_API_URL, ALPACA_AUTH_TOKEN } from "./constant.js";
+import {
+  ALPACA_API_URL,
+  ALPACA_AUTH_TOKEN,
+  SUPPORTED_RESOLUTIONS,
+  TRADING_VIEW_RESOLUTION_TO_ALPACA,
+} from "./constant.js";
 import {
   makeApiRequest,
   generateSymbol,
-  parseFullSymbol,
   makeAlpacaBrokerApiRequest,
-  makeAlpacaMarketApiRequest,
-  fetchAllHistoricalAlpacaData,
-  getResolution,
-  getLatestEndDate,
 } from "./helpers.js";
 import { subscribeOnStream, unsubscribeFromStream } from "./streaming.js";
 
@@ -16,7 +16,7 @@ const lastBarsCache = new Map();
 // DatafeedConfiguration implementation
 const configurationData = {
   // Represents the resolutions for bars supported by your datafeed
-  supported_resolutions: ["1", "15", "30", "60", "6H", "1D", "1W", "2W", "1M"],
+  supported_resolutions: [...SUPPORTED_RESOLUTIONS],
   supports_search: false,
   // The `exchanges` arguments are used for the `searchSymbols` method if a user selects the exchange
   exchanges: [
@@ -160,8 +160,11 @@ export default {
       name: symbolItem.symbol,
       description: symbolItem.description,
       type: symbolItem.type,
-      session: "24x7",
-      timezone: "Etc/UTC",
+      session: "0930-1600", // Regular market hours
+      timezone: "America/New_York",
+
+      // session: "0915-1530", // Indian market hours
+      // timezone: "Asia/Kolkata",
       exchange: symbolItem.exchange,
       minmov: 1,
       pricescale: 100,
@@ -301,16 +304,13 @@ export default {
     console.log("[getBars]: Method call", symbolInfo, resolution, from, to);
     let allBars = [];
     let nextPageToken = null;
-    const start = "2024-01-01T00:00:00Z";
-    const end = "2024-07-18T23:59:59Z";
+    // const start = "2024-01-01T00:00:00Z";
+    const start = "2024-06-01T00:00:00Z";
+    const end = "2024-07-20T14:48:46.74422598Z";
     // const end = getLatestEndDate();
 
     const fetchBars = async (pageToken = null) => {
-      const timeframe = getResolution(resolution);
-      // console.log("timeframe", timeframe);
-      // console.log("isNextPageToken", isNextPageToken);
-      // console.log("pageToken", pageToken);
-      console.log("symbolInfo.name", symbolInfo.name);
+      const timeframe = TRADING_VIEW_RESOLUTION_TO_ALPACA[resolution];
       const encodedSymbol = encodeURIComponent(symbolInfo.name);
       const MARKET_URL = ALPACA_API_URL.MARKET;
       let API_URL = `${MARKET_URL}/v2/stocks/${encodedSymbol}/bars?start=${start}&end=${end}&timeframe=${timeframe}&limit=1000`;
@@ -343,7 +343,7 @@ export default {
           close: bar.c,
           volume: bar.v, // Add volume if available
         }));
-        console.log(bars, "bars");
+        // console.log(bars, "bars");
         allBars = allBars.concat(bars);
         console.log("[Bars length]:", allBars.length);
         nextPageToken = data.next_page_token;
@@ -356,7 +356,7 @@ export default {
           if (firstDataRequest) {
             lastBarsCache.set(symbolInfo.name, {
               ...allBars[allBars.length - 1],
-              time: new Date().getTime(),
+              // time: new Date().getTime(),
             });
           }
           isNextPageToken = false;
@@ -393,7 +393,6 @@ export default {
       onResetCacheNeededCallback,
       lastBarsCache.get(symbolInfo.name)
     );
-    
   },
 
   unsubscribeBars: (subscriberUID) => {

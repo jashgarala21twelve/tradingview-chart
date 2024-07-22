@@ -1,5 +1,10 @@
 import { ALPACA_API_KEY, ALPACA_SECRET_KEY } from "./constant.js";
-import { parseFullSymbol, apiKey, getNextMinuteBarTime } from "./helpers.js";
+import {
+  parseFullSymbol,
+  apiKey,
+  getNextMinuteBarTime,
+  getNextBarTime,
+} from "./helpers.js";
 
 // const socket = new WebSocket(
 //   "ws://127.0.0.1:5229/a1d81405-ccb3-46d3-8f0c-ce2281864c9c"
@@ -100,9 +105,12 @@ socket.on("subscribe_trades", (data) => {
   const tradePrice = parseFloat(tP);
   // const date = new Date(timestamp);
   const tradeTime = timestamp;
+  console.log("tradeTime", tradeTime);
   let subscriptionItem = channelToSubscription.get(symbol);
+
+  let currentTimeFrame = subscriptionItem?.resolution;
   const lastDailyBar = subscriptionItem?.lastDailyBar;
-  const nextDailyBarTime = getNextMinuteBarTime(lastDailyBar.time);
+  const nextDailyBarTime = getNextBarTime(lastDailyBar?.time, currentTimeFrame);
   const formatTime = (timeInMs) => new Date(timeInMs).toISOString();
 
   console.log({
@@ -111,7 +119,7 @@ socket.on("subscribe_trades", (data) => {
     tradeTimeReadable: formatTime(tradeTime),
     lastDailyBarTime: lastDailyBar?.time,
     lastDailyBarTimeReadable: lastDailyBar
-      ? formatTime(lastDailyBar.time)
+      ? formatTime(lastDailyBar?.time)
       : "N/A",
     nextDailyBarTime,
     nextMinuteBarTimeReadable: formatTime(nextDailyBarTime),
@@ -242,6 +250,7 @@ export function subscribeOnStream(
   let subscriptionItem = channelToSubscription.get(channelString);
   if (subscriptionItem) {
     // Already subscribed to the channel, use the existing subscription
+    subscriptionItem.resolution = resolution;
     subscriptionItem.handlers.push(handler);
     return;
   }
