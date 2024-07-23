@@ -109,8 +109,16 @@ socket.on("subscribe_trades", (data) => {
   let subscriptionItem = channelToSubscription.get(symbol);
 
   let currentTimeFrame = subscriptionItem?.resolution;
+  console.log("currentTimeFrame", currentTimeFrame);
   const lastDailyBar = subscriptionItem?.lastDailyBar;
   const nextDailyBarTime = getNextBarTime(lastDailyBar?.time, currentTimeFrame);
+  console.log(
+    "lastDailyBar nextDailyBarTime tradeTime",
+    lastDailyBar?.time,
+    nextDailyBarTime,
+    tradeTime
+  );
+  console.log("lastDailyBar nextDailyBarTime", lastDailyBar > nextDailyBarTime);
   const formatTime = (timeInMs) => new Date(timeInMs).toISOString();
 
   console.log({
@@ -134,7 +142,7 @@ socket.on("subscribe_trades", (data) => {
       low: tradePrice,
       close: tradePrice,
     };
-    console.log("[socket.io] Generate new bar", bar);
+    console.log("[socket.io] Generate new bar", bar.time, lastDailyBar?.time);
   } else {
     bar = {
       ...lastDailyBar,
@@ -233,6 +241,7 @@ export function subscribeOnStream(
   onResetCacheNeededCallback,
   lastDailyBar
 ) {
+  console.log("lastBar", lastDailyBar);
   console.log({
     symbolInfo,
     resolution,
@@ -254,6 +263,7 @@ export function subscribeOnStream(
     subscriptionItem.handlers.push(handler);
     return;
   }
+  console.log("lastDailyBarrr", lastDailyBar);
   subscriptionItem = {
     subscriberUID,
     resolution,

@@ -203,7 +203,7 @@ export default {
     let allBars = [];
     let nextPageToken = null;
     // const start = "2024-01-01T00:00:00Z";
-    const start = "2024-06-01T00:00:00Z";
+    const start = "2024-07-01T00:00:00Z";
     const end = getLatestEndDateForGraph();
     // const end = getLatestEndDate();
 
@@ -241,6 +241,7 @@ export default {
           close: bar.c,
           volume: bar.v, // Add volume if available
         }));
+        bars.sort((a, b) => a.time - b.time);
         // console.log(bars, "bars");
         allBars = allBars.concat(bars);
         console.log("[Bars length]:", allBars.length);
@@ -252,15 +253,15 @@ export default {
           await fetchBars(nextPageToken);
         } else {
           if (firstDataRequest) {
-            // const latestBarData = await getLatestBar(symbolInfo.name);
-            // const latestBar = latestBarData?.bar;
+            const latestBarData = await getLatestBar(symbolInfo.name);
+            const latestBar = latestBarData?.bar;
             lastBarsCache.set(symbolInfo.name, {
               ...allBars[allBars.length - 1],
-              // low: latestBar.l,
-              // high: latestBar.h,
-              // open: latestBar.o,
-              // close: latestBar.c,
-              // volume: latestBar.v, // Add volume if available
+              low: latestBar.l,
+              high: latestBar.h,
+              open: latestBar.o,
+              close: latestBar.c,
+              volume: latestBar.v, // Add volume if available
               // time: new Date().getTime(),
             });
           }

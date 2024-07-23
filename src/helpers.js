@@ -113,7 +113,7 @@ export function getNextMinuteBarTime(barTime) {
 }
 
 export function getNextBarTime(time, timeframe) {
-
+  console.log("TIMEEEEE:", time, timeframe);
   const date = new Date(time); // time is in milliseconds
   switch (timeframe) {
     case SUPPORTED_RESOLUTIONS_VALUES._1MINUTE:
@@ -159,3 +159,14 @@ export function getLatestEndDateForGraph() {
   date.setMinutes(date.getMinutes() - 15);
   return date.toISOString();
 }
+export const adjustToWeekday = (date) => {
+  const day = date.getUTCDay();
+  if (day === 6) {
+    // Saturday
+    date.setUTCDate(date.getUTCDate() - 1);
+  } else if (day === 0) {
+    // Sunday
+    date.setUTCDate(date.getUTCDate() - 2);
+  }
+  return date;
+};
