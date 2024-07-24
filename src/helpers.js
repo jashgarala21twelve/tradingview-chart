@@ -170,3 +170,99 @@ export const adjustToWeekday = (date) => {
   }
   return date;
 };
+// export const generateStaticBars = (resolution, count) => {
+//   const bars = [];
+//   const baseTime = new Date().getTime();
+//   const oneMinute = 60 * 1000;
+//   const thirtyMinutes = 30 * oneMinute;
+//   const sixHours = 6 * 60 * oneMinute;
+//   if (count === 1) {
+//     return [];
+//   }
+//   let interval;
+//   switch (resolution) {
+//     case "1":
+//       interval = oneMinute;
+//       break;
+//     case "2":
+//       interval = oneMinute;
+//       break;
+//     case "30":
+//       interval = thirtyMinutes;
+//       break;
+//     case "6H":
+//       interval = sixHours;
+//       break;
+//     default:
+//       return bars;
+//   }
+
+//   for (let i = 0; i < 5; i++) {
+//     bars.push({
+//       time: baseTime - (5 - i) * interval,
+//       low: 144 + i,
+//       high: 147 + i,
+//       open: 145 + i,
+//       close: 146 + i,
+//       volume: 1000 + i * 100,
+//     });
+//   }
+//   return bars;
+// };
+export const generateStaticBars = (resolution, count) => {
+  const bars = [];
+  const baseTime = new Date().getTime();
+
+  if (count === 1) {
+    return [];
+  }
+  console.log("resolution", resolution);
+  let interval;
+  switch (resolution) {
+    case SUPPORTED_RESOLUTIONS_VALUES._1MINUTE:
+      interval = 1 * 60 * 1000; // 1 minute in milliseconds
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._2MINUTE:
+      interval = 2 * 60 * 1000; // 2 minutes in milliseconds
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._15MINUTE:
+      interval = 15 * 60 * 1000; // 15 minutes in milliseconds
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._30MINUTE:
+      interval = 30 * 60 * 1000; // 30 minutes in milliseconds
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._60MINUTE:
+      interval = 60 * 60 * 1000; // 1 hour in milliseconds
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._6HOURS:
+      interval = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._1DAY:
+      interval = 24 * 60 * 60 * 1000; // 1 day in milliseconds
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._1WEEK:
+      interval = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._2WEEK:
+      interval = 14 * 24 * 60 * 60 * 1000; // 2 weeks in milliseconds
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._1MONTH:
+      interval = 30 * 24 * 60 * 60 * 1000; // Approximate 1 month in milliseconds
+      break;
+    default:
+      return bars;
+  }
+
+  for (let i = 0; i < 5; i++) {
+    bars.push({
+      time: baseTime - (5 - i) * interval,
+      low: 144 + i, 
+      high: 147 + i,
+      open: 145 + i,
+      close: 146 + i,
+      volume: 1000 + i * 100,
+    });
+  }
+
+  return bars;
+};
