@@ -13,4 +13,3 @@ package-lock.json
 *.csproj
 *.pyproj
 *.user
-charting_library
