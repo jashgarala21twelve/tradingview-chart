@@ -1,23 +1,5 @@
-import {
-  ALPACA_API_URL,
-  ALPACA_AUTH_TOKEN,
-  SUPPORTED_RESOLUTIONS_VALUES,
-} from "./constant.js";
+import { BASE_URL, SUPPORTED_RESOLUTIONS_VALUES } from "./constant.js";
 
-// Get a CryptoCompare API key CryptoCompare https://www.cryptocompare.com/coins/guides/how-to-use-our-api/
-export const apiKey =
-  "d7a0472f5ab5476409d078b87d97e0520bd2650975ec4ef3c5e4eed7c2a4765f";
-// Makes requests to CryptoCompare API
-export async function makeApiRequest(path) {
-  try {
-    const url = new URL(`https://min-api.cryptocompare.com/${path}`);
-    url.searchParams.append("api_key", apiKey);
-    const response = await fetch(url.toString());
-    return response.json();
-  } catch (error) {
-    throw new Error(`CryptoCompare request error: ${error.status}`);
-  }
-}
 const makeApiCall = async (method, url, headers) => {
   try {
     const response = await axios({ method, url, headers });
@@ -26,28 +8,28 @@ const makeApiCall = async (method, url, headers) => {
     return { data: null, error: err.message };
   }
 };
-export async function makeAlpacaMarketApiRequest(method, path) {
-  try {
-    const MARKET_URL = ALPACA_API_URL.MARKET + "/v2/" + path;
-    const { data: alpacaData, error } = await makeApiCall(method, MARKET_URL, {
-      Authorization: ALPACA_AUTH_TOKEN,
-    });
-    return alpacaData;
-  } catch (error) {
-    throw new Error(`CryptoCompare request error: ${error.status}`);
-  }
-}
-export async function makeAlpacaBrokerApiRequest(method, path) {
-  try {
-    const BROKER_URL = ALPACA_API_URL.BROKER + "/v1/" + path;
-    const { data: alpacaData, error } = await makeApiCall(method, BROKER_URL, {
-      Authorization: ALPACA_AUTH_TOKEN,
-    });
-    return alpacaData;
-  } catch (error) {
-    throw new Error(`CryptoCompare request error: ${error.status}`);
-  }
-}
+// export async function makeAlpacaMarketApiRequest(method, path) {
+//   try {
+//     const MARKET_URL = ALPACA_API_URL.MARKET + "/v2/" + path;
+//     const { data: alpacaData, error } = await makeApiCall(method, MARKET_URL, {
+//       Authorization: ALPACA_AUTH_TOKEN,
+//     });
+//     return alpacaData;
+//   } catch (error) {
+//     throw new Error(`CryptoCompare request error: ${error.status}`);
+//   }
+// }
+// export async function makeAlpacaBrokerApiRequest(method, path) {
+//   try {
+//     const BROKER_URL = ALPACA_API_URL.BROKER + "/v1/" + path;
+//     const { data: alpacaData, error } = await makeApiCall(method, BROKER_URL, {
+//       Authorization: ALPACA_AUTH_TOKEN,
+//     });
+//     return alpacaData;
+//   } catch (error) {
+//     throw new Error(`CryptoCompare request error: ${error.status}`);
+//   }
+// }
 
 export const fetchAllHistoricalAlpacaData = async (baseUrl) => {
   let allAlpacaData = [];
@@ -83,6 +65,11 @@ export const getLatestBar = async (symbol) => {
   return data;
 };
 
+export const getAllAssets = async () => {
+  const URL = BASE_URL + "/api/shares/fetchAllShare";
+  const { data: response, error } = await makeApiCall("get", URL, {});
+  return response?.data;
+};
 // Generates a symbol ID from a pair of the coins
 export function generateSymbol(exchange, fromSymbol, toSymbol) {
   const short = `${fromSymbol}/${toSymbol}`;
@@ -113,7 +100,7 @@ export function getNextMinuteBarTime(barTime) {
 }
 
 export function getNextBarTime(time, timeframe) {
-  console.log("TIMEEEEE:", time, timeframe);
+  // console.log("TIMEEEEE:", time, timeframe);
   const date = new Date(time); // time is in milliseconds
   switch (timeframe) {
     case SUPPORTED_RESOLUTIONS_VALUES._1MINUTE:
@@ -170,6 +157,15 @@ export const adjustToWeekday = (date) => {
   }
   return date;
 };
+
+export const isSameDay = (date1, date2) => {
+  return (
+    date1.getUTCFullYear() === date2.getUTCFullYear() &&
+    date1.getUTCMonth() === date2.getUTCMonth() &&
+    date1.getUTCDate() === date2.getUTCDate()
+  );
+};
+
 // export const generateStaticBars = (resolution, count) => {
 //   const bars = [];
 //   const baseTime = new Date().getTime();
@@ -256,7 +252,7 @@ export const generateStaticBars = (resolution, count) => {
   for (let i = 0; i < 5; i++) {
     bars.push({
       time: baseTime - (5 - i) * interval,
-      low: 144 + i, 
+      low: 144 + i,
       high: 147 + i,
       open: 145 + i,
       close: 146 + i,

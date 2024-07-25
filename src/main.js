@@ -2,9 +2,18 @@
 import { DEFAULT_RESOLUTION } from "./constant.js";
 import Datafeed from "./datafeed.js";
 
+function getUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    symbol: params.get("symbol") || "NASDAQ:AAPL",
+    theme: params.get("theme") || "light",
+    interval: params.get("interval") || DEFAULT_RESOLUTION,
+  };
+}
+const { symbol, theme, interval } = getUrlParams();
 window.tvWidget = new TradingView.widget({
-  symbol: "NASDAQ:AAPL", // Default symbol
-  interval: DEFAULT_RESOLUTION, // Default interval
+  symbol: symbol, // Default symbol
+  interval: interval, // Default interval
   fullscreen: true, // Displays the chart in the fullscreen mode
   container: "tv_chart_container", // Reference to an attribute of the DOM element
   datafeed: Datafeed,
@@ -13,10 +22,10 @@ window.tvWidget = new TradingView.widget({
   overrides: {
     "mainSeriesProperties.showCountdown": true, // Show countdown
   },
-  theme: "light",
+  theme: theme,
   // debug: true,
 });
 
 window.tvWidget.onChartReady(function () {
-  window.tvWidget.chart().setResolution(DEFAULT_RESOLUTION);
+  window.tvWidget.chart().setResolution(interval);
 });

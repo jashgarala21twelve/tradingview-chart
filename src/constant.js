@@ -1,17 +1,11 @@
-export const ALPACA_API_URL = {
-  // BROKER: "https://broker-api.sandbox.alpaca.markets",
-  BROKER: "https://broker-api.alpaca.markets",
-  // MARKET: "https://data.sandbox.alpaca.markets",
-  MARKET: "https://data.alpaca.markets",
-};
-
-// export const ALPACA_AUTH_TOKEN =
-//   "Basic Q0sxMDAxM0RXT0xNWkJJRThJQVE6Y1RsQ3kzQnpJVGZaazcwSXNDWGNrRURTTHBIVTZzOXBaQjRUZlhnYQ==";
-export const ALPACA_AUTH_TOKEN =
-  "Basic Q0szOTJGRFE3NDFGSDdaNkY4Ulk6em5rOHQxMEJTc292UHJxaThoZDQ1aGNiUXRuakxjaDFHM0x1cHlQOA==";
-
-export const ALPACA_SECRET_KEY = "DfsVelzEZ86w7uu0RmHRhudkIHYVIYbDRuzddGvK";
-export const ALPACA_API_KEY = "PKC1FGBW9QXTZTPWWCRA";
+// export const ALPACA_API_URL = {
+//   // BROKER: "https://broker-api.sandbox.alpaca.markets",
+//   // BROKER: "https://broker-api.alpaca.markets",
+//   // MARKET: "https://data.sandbox.alpaca.markets",
+//   // MARKET: "https://data.alpaca.markets",
+//   BASE_URL: "https://prospuh.io",
+// };
+export const BASE_URL = "https://prospuh.io";
 
 export const SUPPORTED_RESOLUTIONS_VALUES = {
   _1MINUTE: "1",
@@ -26,6 +20,7 @@ export const SUPPORTED_RESOLUTIONS_VALUES = {
   _1MONTH: "1M",
 };
 
+export const isSmallTimeFrame = (t) => ["1", "2", "15", "30", "60"].includes(t);
 export const TRADING_VIEW_RESOLUTION_TO_ALPACA = {
   [SUPPORTED_RESOLUTIONS_VALUES._1MINUTE]: "1min",
   [SUPPORTED_RESOLUTIONS_VALUES._2MINUTE]: "2min",
