@@ -8,184 +8,185 @@ import {
 
 // http://prospuh.io:2001
 
-// const socket = io("http://localhost:5000");
-// const channelToSubscription = new Map();
-// let RESOLUTION;
-// socket.on("connect", () => {
-//   console.log("[socket.io] Connected to server");
-// });
-// socket.on("subscribe_trades", (data) => {
-//   const { symbol, price: tP, timestamp } = data;
-//   console.log("data", data);
-//   const date = new Date(timestamp).getTime();
-//   // const unixTimeInSeconds = Math.floor(date / 1000);
-//   // const tradeTime = unixTimeInSeconds;
-//   const tradeTime = date;
-//   const tradePrice = parseFloat(tP);
-//   // const date = new Date(timestamp);
-//   // const tradeTime = timestamp;
-//   // console.log("tradeTime", tradeTime);
-//   console.log("DDDDDDDD", channelToSubscription.get(symbol));
-//   let subscriptionItem = channelToSubscription.get(symbol);
-//   console.log("subscriptionItem", subscriptionItem);
+const socket = io("http://localhost:5000");
+const channelToSubscription = new Map();
 
-//   let currentTimeFrame = subscriptionItem?.resolution;
+socket.on("connect", () => {
+  console.log("[socket.io] Connected to server");
+});
+socket.on("subscribe_trades", (data) => {
+  const { symbol, price: tP, timestamp } = data;
+  console.log("data", data);
 
-//   const lastDailyBar = subscriptionItem?.lastDailyBar;
-//   console.log(
-//     "[LASTBAR] - STREAM",
-//     new Date(lastDailyBar.time).toTimeString(),
-//     new Date(lastDailyBar.time).toDateString()
-//   );
-//   const nextDailyBarTime = getNextBarTime(lastDailyBar?.time, currentTimeFrame);
-//   console.log(
-//     "lastDailyBar nextDailyBarTime tradeTime",
-//     lastDailyBar?.time,
-//     nextDailyBarTime,
-//     tradeTime
-//   );
-//   console.log("lastDailyBar nextDailyBarTime", lastDailyBar > nextDailyBarTime);
-//   const formatTime = (timeInMs) => new Date(timeInMs).toISOString();
+  const date = new Date(timestamp).getTime();
+  // const unixTimeInSeconds = Math.floor(date / 1000);
+  // const tradeTime = unixTimeInSeconds;
+  const tradeTime = date;
+  const tradePrice = parseFloat(tP);
+  // const date = new Date(timestamp);
+  // const tradeTime = timestamp;
+  // console.log("tradeTime", tradeTime);
 
-//   // console.log({
-//   //   subscriptionItem,
-//   //   tradeTime,
-//   //   tradeTimeReadable: formatTime(tradeTime),
-//   //   lastDailyBarTime: lastDailyBar?.time,
-//   //   lastDailyBarTimeReadable: lastDailyBar
-//   //     ? formatTime(lastDailyBar?.time)
-//   //     : "N/A",
-//   //   nextDailyBarTime,
-//   //   nextMinuteBarTimeReadable: formatTime(nextDailyBarTime),
-//   // });
-//   let bar;
+  let subscriptionItem = channelToSubscription.get(symbol);
+  console.log("CCCCCCCCCC [stream]", subscriptionItem);
+  let currentTimeFrame = window.activeResolution;
 
-//   console.log(tradeTime >= nextDailyBarTime, "IsNewBar");
+  const lastDailyBar = subscriptionItem?.lastBars[currentTimeFrame];
+  console.log(
+    "[LASTBAR] - STREAM",
+    new Date(lastDailyBar.time).toTimeString(),
+    new Date(lastDailyBar.time).toDateString()
+  );
+  const nextDailyBarTime = getNextBarTime(lastDailyBar?.time, currentTimeFrame);
+  console.log("nextDailyBarTime", nextDailyBarTime);
+  // console.log(
+  //   "lastDailyBar nextDailyBarTime tradeTime",
+  //   lastDailyBar?.time,
+  //   nextDailyBarTime,
+  //   tradeTime
+  // );
 
-//   console.table([
-//     {
-//       Label: "Trade Time",
-//       Time: new Date(tradeTime).toTimeString(),
-//       Date: new Date(tradeTime).toDateString(),
-//     },
-//     {
-//       Label: "Last Daily Bar Time",
-//       Time: new Date(lastDailyBar.time).toTimeString(),
-//       Date: new Date(lastDailyBar.time).toDateString(),
-//     },
-//     {
-//       Label: "Next Daily Bar Time",
-//       Time: new Date(nextDailyBarTime).toTimeString(),
-//       Date: new Date(nextDailyBarTime).toDateString(),
-//     },
-//   ]);
-//   console.log(isSmallTimeFrame(currentTimeFrame), "isSmallTimeFrame");
-//   // if (isSmallTimeFrame(currentTimeFrame)) {
-//   //   console.log(
-//   //     isSameDay(new Date(lastDailyBar.time), new Date(tradeTime)),
-//   //     "isSameDay"
-//   //   );
-//   //   if (!isSameDay(new Date(lastDailyBar.time), new Date(tradeTime))) {
-//   //     return;
-//   //   }
-//   // }
+  // console.log({
+  //   subscriptionItem,
+  //   tradeTime,
+  //   tradeTimeReadable: formatTime(tradeTime),
+  //   lastDailyBarTime: lastDailyBar?.time,
+  //   lastDailyBarTimeReadable: lastDailyBar
+  //     ? formatTime(lastDailyBar?.time)
+  //     : "N/A",
+  //   nextDailyBarTime,
+  //   nextMinuteBarTimeReadable: formatTime(nextDailyBarTime),
+  // });
+  let bar;
 
-//   if (tradeTime >= nextDailyBarTime) {
-//     bar = {
-//       time: nextDailyBarTime,
-//       open: tradePrice,
-//       high: tradePrice,
-//       low: tradePrice,
-//       close: tradePrice,
-//     };
-//     console.log("[socket.io] Generate new bar", bar.time, lastDailyBar?.time);
-//   } else {
-//     bar = {
-//       ...lastDailyBar,
-//       high: Math.max(lastDailyBar.high, tradePrice),
-//       low: Math.min(lastDailyBar.low, tradePrice),
-//       close: tradePrice,
-//     };
-//     console.log("[socket.io] Update the latest bar by price", tradePrice);
-//   }
+  console.log(tradeTime >= nextDailyBarTime, "IsNewBar");
 
-//   subscriptionItem.lastDailyBar = bar;
-//   // //   // Send data to every subscriber of that symbol
-//   subscriptionItem.handlers.forEach((handler) => handler.callback(bar));
+  console.table([
+    {
+      Label: "Trade Time",
+      Time: new Date(tradeTime).toTimeString(),
+      Date: new Date(tradeTime).toDateString(),
+    },
+    {
+      Label: "Last Daily Bar Time",
+      Time: new Date(lastDailyBar.time).toTimeString(),
+      Date: new Date(lastDailyBar.time).toDateString(),
+    },
+    {
+      Label: "Next Daily Bar Time",
+      Time: new Date(nextDailyBarTime).toTimeString(),
+      Date: new Date(nextDailyBarTime).toDateString(),
+    },
+  ]);
+  console.log(isSmallTimeFrame(currentTimeFrame), "isSmallTimeFrame");
+  // if (isSmallTimeFrame(currentTimeFrame)) {
+  //   console.log(
+  //     isSameDay(new Date(lastDailyBar.time), new Date(tradeTime)),
+  //     "isSameDay"
+  //   );
+  //   if (!isSameDay(new Date(lastDailyBar.time), new Date(tradeTime))) {
+  //     return;
+  //   }
+  // }
 
-//   // if (bar.time === lastDailyBar.time) {
-//   //   subscriptionItem.handlers.forEach((handler) => handler.callback(bar)); // Update the most recent bar
-//   //   subscriptionItem.lastDailyBar = bar; // Update the last bar in the subscription
-//   // } else if (bar.time > lastDailyBar.time) {
-//   //   subscriptionItem.handlers.forEach((handler) => handler.callback(bar)); // Add a new bar
-//   // } else {
-//   //   subscriptionItem.handlers.forEach((handler) =>
-//   //     handler.onResetCacheNeededCallback()
-//   //   ); // Trigger a cache reset
-//   // }
-// });
-// socket.on("disconnect", (reason) => {
-//   console.log("[socket.io] Disconnected:", reason);
-// });
+  if (tradeTime >= nextDailyBarTime) {
+    bar = {
+      time: nextDailyBarTime,
+      open: tradePrice,
+      high: tradePrice,
+      low: tradePrice,
+      close: tradePrice,
+    };
+    console.log("[socket.io] Generate new bar", bar.time, lastDailyBar?.time);
+  } else {
+    bar = {
+      ...lastDailyBar,
+      high: Math.max(lastDailyBar.high, tradePrice),
+      low: Math.min(lastDailyBar.low, tradePrice),
+      close: tradePrice,
+    };
+    console.log("[socket.io] Update the latest bar by price", tradePrice);
+  }
 
-// socket.on("error", (error) => {
-//   console.log("[socket.io] Error:", error);
-// });
+  subscriptionItem.lastBars[currentTimeFrame] = bar;
 
-// socket.on("message", (data) => {
-//   console.log("[socket.io] Message:", data);
-//   const {
-//     TYPE: eventTypeStr,
-//     M: exchange,
-//     FSYM: fromSymbol,
-//     TSYM: toSymbol,
-//     TS: tradeTimeStr,
-//     P: tradePriceStr,
-//   } = data;
+  // //   // Send data to every subscriber of that symbol
+  subscriptionItem.handlers.forEach((handler) => handler.callback(bar));
+  console.log("SUBBBBBBBBBBBBBBBBB", subscriptionItem);
 
-//   if (parseInt(eventTypeStr) !== 0) {
-//     // Skip all non-trading events
-//     return;
-//   }
+  // if (bar.time === lastDailyBar.time) {
+  //   subscriptionItem.handlers.forEach((handler) => handler.callback(bar)); // Update the most recent bar
+  //   subscriptionItem.lastDailyBar = bar; // Update the last bar in the subscription
+  // } else if (bar.time > lastDailyBar.time) {
+  //   subscriptionItem.handlers.forEach((handler) => handler.callback(bar)); // Add a new bar
+  // } else {
+  //   subscriptionItem.handlers.forEach((handler) =>
+  //     handler.onResetCacheNeededCallback()
+  //   ); // Trigger a cache reset
+  // }
+});
+socket.on("disconnect", (reason) => {
+  console.log("[socket.io] Disconnected:", reason);
+});
 
-//   const tradePrice = parseFloat(tradePriceStr);
-//   const tradeTime = parseInt(tradeTimeStr);
-//   const channelString = `0~${exchange}~${fromSymbol}~${toSymbol}`;
-//   const subscriptionItem = channelToSubscription.get(channelString);
+socket.on("error", (error) => {
+  console.log("[socket.io] Error:", error);
+});
 
-//   if (subscriptionItem === undefined) {
-//     return;
-//   }
+socket.on("message", (data) => {
+  console.log("[socket.io] Message:", data);
+  const {
+    TYPE: eventTypeStr,
+    M: exchange,
+    FSYM: fromSymbol,
+    TSYM: toSymbol,
+    TS: tradeTimeStr,
+    P: tradePriceStr,
+  } = data;
 
-//   const lastDailyBar = subscriptionItem.lastDailyBar;
-//   const nextDailyBarTime = getNextDailyBarTime(lastDailyBar.time);
+  if (parseInt(eventTypeStr) !== 0) {
+    // Skip all non-trading events
+    return;
+  }
 
-//   let bar;
+  const tradePrice = parseFloat(tradePriceStr);
+  const tradeTime = parseInt(tradeTimeStr);
+  const channelString = `0~${exchange}~${fromSymbol}~${toSymbol}`;
+  const subscriptionItem = channelToSubscription.get(channelString);
 
-//   if (tradeTime >= nextDailyBarTime) {
-//     bar = {
-//       time: nextDailyBarTime,
-//       open: tradePrice,
-//       high: tradePrice,
-//       low: tradePrice,
-//       close: tradePrice,
-//     };
-//     console.log("[socket.io] Generate new bar", bar);
-//   } else {
-//     bar = {
-//       ...lastDailyBar,
-//       high: Math.max(lastDailyBar.high, tradePrice),
-//       low: Math.min(lastDailyBar.low, tradePrice),
-//       close: tradePrice,
-//     };
-//     console.log("[socket.io] Update the latest bar by price", tradePrice);
-//   }
+  if (subscriptionItem === undefined) {
+    return;
+  }
 
-//   subscriptionItem.lastDailyBar = bar;
+  const lastDailyBar = subscriptionItem.lastDailyBar;
+  const nextDailyBarTime = getNextDailyBarTime(lastDailyBar.time);
 
-//   //   // Send data to every subscriber of that symbol
-//   subscriptionItem.handlers.forEach((handler) => handler.callback(bar));
-// });
+  let bar;
+
+  if (tradeTime >= nextDailyBarTime) {
+    bar = {
+      time: nextDailyBarTime,
+      open: tradePrice,
+      high: tradePrice,
+      low: tradePrice,
+      close: tradePrice,
+    };
+    console.log("[socket.io] Generate new bar", bar);
+  } else {
+    bar = {
+      ...lastDailyBar,
+      high: Math.max(lastDailyBar.high, tradePrice),
+      low: Math.min(lastDailyBar.low, tradePrice),
+      close: tradePrice,
+    };
+    console.log("[socket.io] Update the latest bar by price", tradePrice);
+  }
+
+  subscriptionItem.lastDailyBar = bar;
+
+  //   // Send data to every subscriber of that symbol
+  subscriptionItem.handlers.forEach((handler) => handler.callback(bar));
+});
 // function getNextDailyBarTime(barTime) {
 //   const date = new Date(barTime);
 //   date.setDate(date.getDate() + 1);
@@ -228,20 +229,27 @@ export function subscribeOnStream(
     onResetCacheNeededCallback: onResetCacheNeededCallback,
   };
   let subscriptionItem = channelToSubscription.get(channelString);
-  console.log("CCCCCCCCCC", subscriptionItem);
-  RESOLUTION = resolution;
+  console.log("CCCCCCCCCC [subscribe] BEFORE SET", subscriptionItem);
+
   if (subscriptionItem) {
     // Already subscribed to the channel, use the existing subscription
-    subscriptionItem.resolution = resolution;
-    subscriptionItem.lastDailyBar = lastDailyBar;
+    // subscriptionItem.resolution = resolution;
     subscriptionItem.handlers.push(handler);
+    // subscriptionItem.subscriberUID = subscriberUID;
+    subscriptionItem.lastBars = {
+      ...subscriptionItem?.lastBars,
+      [resolution]: lastDailyBar,
+    };
+    // channelToSubscription.set(channelString, subscriptionItem);
+    console.log("CCCCCCCCCC [subscribe] AFTER SET", subscriptionItem);
     return;
   }
-  console.log("lastDailyBarrr", lastDailyBar);
   subscriptionItem = {
     subscriberUID,
     resolution,
-    lastDailyBar,
+    lastBars: {
+      [resolution]: lastDailyBar,
+    },
     handlers: [handler],
   };
 
@@ -250,8 +258,9 @@ export function subscribeOnStream(
     "[subscribeBars]: Subscribe to streaming. Channel:",
     channelString
   );
-
+  console.log("CCCCCCCCCC [subscribe] AFTER SET", subscriptionItem);
   socket.emit("subscribe", { type: "trades", symbol: symbolInfo.name });
+  window.isSubscribeCalledOnResolutionChange = true;
   // socket.emit("subscribe", { type: "bars", symbol: symbolInfo.name });
 
   // const subRequest = {

@@ -138,10 +138,10 @@ export default {
       name: symbolItem.symbol,
       description: symbolItem.description,
       type: symbolItem.type,
-      session: "0930-1600", // Regular market hours
-      timezone: "America/New_York",
-      // session: "24x7",
-      // timezone: "Etc/UTC",
+      // session: "0930-1600", // Regular market hours
+      // timezone: "America/New_York",
+      session: "24x7",
+      timezone: "Etc/UTC",
       exchange: symbolItem.exchange,
       minmov: 1,
       pricescale: 100,
@@ -341,7 +341,8 @@ export default {
       resolution,
       from,
       to,
-      countBack
+      countBack,
+      firstDataRequest
     );
     const fromDate = new Date(from * 1000);
     const toDate = new Date(to * 1000);
@@ -413,8 +414,15 @@ export default {
         if (firstDataRequest) {
           lastBarsCache.set(symbolInfo.name, {
             ...bars[bars.length - 1],
-            time: new Date().getTime(),
+            // time: new Date().getTime(),
           });
+          // lastBarsCache.set(symbolInfo.name, {
+          //   [resolution]: {
+          //     ...bars[bars.length - 1],
+          //     time: new Date().getTime(),
+          //   },
+          // });
+          console.log(lastBarsCache, "AAAA");
         }
         console.log("[Bars length]:", allBars.length);
       } catch (error) {
@@ -445,14 +453,15 @@ export default {
     //   new Date(lastBarsCache.get(symbolInfo.name).time).toTimeString(),
     //   new Date(lastBarsCache.get(symbolInfo.name).time).toDateString()
     // );
-    // subscribeOnStream(
-    //   symbolInfo,
-    //   resolution,
-    //   onRealtimeCallback,
-    //   subscriberUID,
-    //   onResetCacheNeededCallback,
-    //   lastBarsCache.get(symbolInfo.name)[resolution]
-    // );
+    console.log("LASTBAR", lastBarsCache.get(symbolInfo.name));
+    subscribeOnStream(
+      symbolInfo,
+      resolution,
+      onRealtimeCallback,
+      subscriberUID,
+      onResetCacheNeededCallback,
+      lastBarsCache.get(symbolInfo.name)
+    );
   },
 
   unsubscribeBars: (subscriberUID) => {
