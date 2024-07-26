@@ -53,7 +53,7 @@ export const fetchAllHistoricalAlpacaData = async (baseUrl) => {
 
     // Update the URL with the new page token
     url = `${baseUrl}&page_token=${next_page_token}`;
-    console.log(url, "url");
+  
   }
 
   return allAlpacaData;

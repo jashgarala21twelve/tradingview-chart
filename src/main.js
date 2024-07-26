@@ -1,7 +1,6 @@
 // Datafeed implementation
 import { DEFAULT_RESOLUTION } from "./constant.js";
 import Datafeed from "./datafeed.js";
-
 function getUrlParams() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -17,7 +16,7 @@ window.tvWidget = new TradingView.widget({
   fullscreen: true, // Displays the chart in the fullscreen mode
   container: "tv_chart_container", // Reference to an attribute of the DOM element
   datafeed: Datafeed,
-  library_path: "../charting_library/",
+  library_path: "../charting_library/charting_library.js",
   disabled_features: ["header_symbol_search", "symbol_search_hot_key"],
   overrides: {
     "mainSeriesProperties.showCountdown": true, // Show countdown

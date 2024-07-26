@@ -126,7 +126,7 @@ export default {
     console.log("[resolveSymbol]: Method call", symbol);
     const symbols = await getAllSymbolsAlpaca();
     const symbolItem = symbols.find(({ full_name }) => full_name === symbol);
-    console.log("symbolItem", symbolItem);
+
     if (!symbolItem) {
       console.log("[resolveSymbol]: Cannot resolve symbol", symbol);
       onResolveErrorCallback("cannot resolve symbol");
@@ -335,14 +335,7 @@ export default {
     onErrorCallback
   ) => {
     const { from, to, firstDataRequest, countBack } = periodParams;
-    console.log(
-      "[getBars]: Method call",
-      symbolInfo,
-      resolution,
-      from,
-      to,
-      countBack
-    );
+
     const fromDate = new Date(from * 1000);
     const toDate = new Date(to * 1000);
 
@@ -355,9 +348,6 @@ export default {
       end = toDate.toISOString();
     }
 
-    console.log("start", start);
-    console.log("end", end);
-    console.log("START END", start, end);
     let allBars = [];
     let nextPageToken = null;
     // const start = "2024-01-01T00:00:00Z";
@@ -416,7 +406,7 @@ export default {
             time: new Date().getTime(),
           });
         }
-        console.log("[Bars length]:", allBars.length);
+
       } catch (error) {
         console.log("error", error.message);
         console.log("[getBars]: Get error", error);
@@ -451,7 +441,7 @@ export default {
     //   onRealtimeCallback,
     //   subscriberUID,
     //   onResetCacheNeededCallback,
-    //   lastBarsCache.get(symbolInfo.name)[resolution]
+    //   lastBarsCache.get(symbolInfo.name)
     // );
   },
 

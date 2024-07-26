@@ -8,7 +8,7 @@ import {
 
 // http://prospuh.io:2001
 
-// const socket = io("http://localhost:5000");
+// const socket = io("");
 // const channelToSubscription = new Map();
 // let RESOLUTION;
 // socket.on("connect", () => {
@@ -207,19 +207,6 @@ export function subscribeOnStream(
   onResetCacheNeededCallback,
   lastDailyBar
 ) {
-  console.log(
-    "[LASTBAR]-SUBSCRIBE INSIDE",
-    new Date(lastDailyBar.time).toTimeString(),
-    new Date(lastDailyBar.time).toDateString()
-  );
-  console.log({
-    symbolInfo,
-    resolution,
-    onRealtimeCallback,
-    subscriberUID,
-    onResetCacheNeededCallback,
-    lastDailyBar,
-  });
   // const parsedSymbol = parseFullSymbol(symbolInfo.full_name);
   const channelString = `${symbolInfo.name}`;
   const handler = {
@@ -228,7 +215,7 @@ export function subscribeOnStream(
     onResetCacheNeededCallback: onResetCacheNeededCallback,
   };
   let subscriptionItem = channelToSubscription.get(channelString);
-  console.log("CCCCCCCCCC", subscriptionItem);
+
   RESOLUTION = resolution;
   if (subscriptionItem) {
     // Already subscribed to the channel, use the existing subscription
@@ -237,7 +224,7 @@ export function subscribeOnStream(
     subscriptionItem.handlers.push(handler);
     return;
   }
-  console.log("lastDailyBarrr", lastDailyBar);
+
   subscriptionItem = {
     subscriberUID,
     resolution,
@@ -246,10 +233,6 @@ export function subscribeOnStream(
   };
 
   channelToSubscription.set(channelString, subscriptionItem);
-  console.log(
-    "[subscribeBars]: Subscribe to streaming. Channel:",
-    channelString
-  );
 
   socket.emit("subscribe", { type: "trades", symbol: symbolInfo.name });
   // socket.emit("subscribe", { type: "bars", symbol: symbolInfo.name });
@@ -295,7 +278,7 @@ export function unsubscribeFromStream(subscriberUID) {
   // Find a subscription with id === subscriberUID
   for (const channelString of channelToSubscription.keys()) {
     const subscriptionItem = channelToSubscription.get(channelString);
-    console.log("subscriptionItemmmm", subscriptionItem);
+
     const handlerIndex = subscriptionItem.handlers.findIndex(
       (handler) => handler.id === subscriberUID
     );
@@ -306,10 +289,7 @@ export function unsubscribeFromStream(subscriberUID) {
 
       if (subscriptionItem.handlers.length === 0) {
         // Unsubscribe from the channel if it was the last handler
-        console.log(
-          "[unsubscribeBars]: Unsubscribe from streaming. Channel:",
-          channelString
-        );
+
         // const subRequest = {
         //   action: "SubRemove",
         //   subs: [channelString],
