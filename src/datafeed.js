@@ -1,5 +1,6 @@
 import {
   BASE_URL,
+  isLargeTimeFrame,
   SUPPORTED_RESOLUTIONS,
   TRADING_VIEW_RESOLUTION_TO_ALPACA,
 } from "./constant.js";
@@ -155,98 +156,99 @@ export default {
     onSymbolResolvedCallback(symbolInfo);
   },
 
-  getBars: async (
-    symbolInfo,
-    resolution,
-    periodParams,
-    onHistoryCallback,
-    onErrorCallback
-  ) => {
-    const { from, to, firstDataRequest, countBack } = periodParams;
-    console.log(
-      "[getBars]: Method call",
-      symbolInfo,
-      resolution,
-      from,
-      to,
-      countBack
-    );
-    let allBars = [];
-    let nextPageToken = null;
+  // getBars: async (
+  //   symbolInfo,
+  //   resolution,
+  //   periodParams,
+  //   onHistoryCallback,
+  //   onErrorCallback
+  // ) => {
+  //   const { from, to, firstDataRequest, countBack } = periodParams;
+  //   console.log(
+  //     "[getBars]: Method call",
+  //     symbolInfo,
+  //     resolution,
+  //     from,
+  //     to,
+  //     countBack
+  //   );
+  //   let allBars = [];
+  //   let nextPageToken = null;
 
-    const date = new Date();
-    date.setMonth(date.getMonth() - 6);
-    const start = date.toISOString();
-    const end = getLatestEndDateForGraph();
-    // const end = getLatestEndDate();
+  //   const date = new Date();
+  //   date.setMonth(date.getMonth() - 6);
+  //   const start = date.toISOString();
+  //   const end = getLatestEndDateForGraph();
+  //   // const end = getLatestEndDate();
 
-    const fetchBars = async (pageToken = null) => {
-      const timeframe = TRADING_VIEW_RESOLUTION_TO_ALPACA[resolution];
-      const encodedSymbol = encodeURIComponent(symbolInfo.name);
-      // const MARKET_URL = ALPACA_API_URL.MARKET;
-      // let API_URL = `${MARKET_URL}/v2/stocks/${encodedSymbol}/bars?start=${start}&end=${end}&timeframe=${timeframe}&limit=1000`;
-      let API_URL = `${BASE_URL}/api/position/bars/${encodedSymbol}?start=${start}&end=${end}&timeframe=${timeframe}&limit=1000`;
-      if (!isNextPageToken && !firstDataRequest) {
-        isNextPageToken = true;
-        onHistoryCallback([], { noData: true });
-      }
-      if (pageToken) {
-        API_URL += `&page_token=${pageToken}`;
-      }
+  //   const fetchBars = async (pageToken = null) => {
+  //     const timeframe = TRADING_VIEW_RESOLUTION_TO_ALPACA[resolution];
+  //     const encodedSymbol = encodeURIComponent(symbolInfo.name);
+  //     // const MARKET_URL = ALPACA_API_URL.MARKET;
+  //     // let API_URL = `${MARKET_URL}/v2/stocks/${encodedSymbol}/bars?start=${start}&end=${end}&timeframe=${timeframe}&limit=1000`;
+  //     let API_URL = `${BASE_URL}/api/position/bars/${encodedSymbol}?start=${start}&end=${end}&timeframe=${timeframe}&limit=1000`;
+  //     if (!isNextPageToken && !firstDataRequest) {
+  //       isNextPageToken = true;
+  //       onHistoryCallback([], { noData: true });
+  //     }
+  //     if (pageToken) {
+  //       API_URL += `&page_token=${pageToken}`;
+  //     }
 
-      try {
-        const response = await fetch(API_URL, {});
-        const { data } = await response.json();
+  //     try {
+  //       const response = await fetch(API_URL, {});
+  //       const { data } = await response.json();
 
-        if (!response.ok || !data.bars || data.bars.length === 0) {
-          onHistoryCallback([], { noData: true });
-          return;
-        }
+  //       if (!response.ok || !data.bars || data.bars.length === 0) {
+  //         onHistoryCallback([], { noData: true });
+  //         return;
+  //       }
 
-        const bars = data.bars.map((bar) => ({
-          time: new Date(bar.t).getTime(),
-          low: bar.l,
-          high: bar.h,
-          open: bar.o,
-          close: bar.c,
-          volume: bar.v, // Add volume if available
-        }));
-        bars.sort((a, b) => a.time - b.time);
-        // console.log(bars, "bars");
-        allBars = allBars.concat(bars);
-        console.log("[Bars length]:", allBars.length);
-        nextPageToken = data.next_page_token;
+  //       const bars = data.bars.map((bar) => ({
+  //         time: new Date(bar.t).getTime(),
+  //         low: bar.l,
+  //         high: bar.h,
+  //         open: bar.o,
+  //         close: bar.c,
+  //         volume: bar.v, // Add volume if available
+  //       }));
+  //       bars.sort((a, b) => a.time - b.time);
+  //       // console.log(bars, "bars");
+  //       allBars = allBars.concat(bars);
+  //       console.log("[Bars length]:", allBars.length);
+  //       nextPageToken = data.next_page_token;
 
-        if (nextPageToken) {
-          isNextPageToken = true;
-          // Fetch next page of data
-          await fetchBars(nextPageToken);
-        } else {
-          if (firstDataRequest) {
-            // window.isSocketOn = false;
-            // const latestBarData = await getLatestBar(symbolInfo.name);
-            // const latestBar = latestBarData?.bar;
-            lastBarsCache.set(symbolInfo.name, {
-              ...lastBarsCache.get(symbolInfo.name),
-              [resolution]: {
-                ...allBars[allBars.length - 1],
-              },
-            });
-          }
-          isNextPageToken = false;
-          // console.log("bars", allBars);
-          onHistoryCallback(allBars, { noData: false });
-        }
-      } catch (error) {
-        console.log("error", error.message);
-        console.log("[getBars]: Get error", error);
-        onErrorCallback(error);
-      }
-    };
+  //       if (nextPageToken) {
+  //         isNextPageToken = true;
+  //         // Fetch next page of data
+  //         await fetchBars(nextPageToken);
+  //       } else {
+  //         if (firstDataRequest) {
+  //           // window.isSocketOn = false;
+  //           // const latestBarData = await getLatestBar(symbolInfo.name);
+  //           // const latestBar = latestBarData?.bar;
+  //           lastBarsCache.set(symbolInfo.name, {
+  //             ...lastBarsCache.get(symbolInfo.name),
+  //             [resolution]: {
+  //               ...allBars[allBars.length - 1],
+  //             },
+  //           });
+  //         }
+  //         isNextPageToken = false;
+  //         // console.log("bars", allBars);
+  //         onHistoryCallback(allBars, { noData: false });
+  //       }
+  //     } catch (error) {
+  //       console.log("error", error.message);
+  //       console.log("[getBars]: Get error", error);
+  //       onErrorCallback(error);
+  //     }
+  //   };
 
-    await fetchBars();
-  },
+  //   await fetchBars();
+  // },
 
+  ////////////STATIC BARS///////////////
   // getBars: async (
   //   symbolInfo,
   //   resolution,
@@ -325,92 +327,105 @@ export default {
   //   console.log("allBarssss", allBars);
   //   console.log(lastBarsCache, "lllll");
   // },
-  // getBars: async (
-  //   symbolInfo,
-  //   resolution,
-  //   periodParams,
-  //   onHistoryCallback,
-  //   onErrorCallback
-  // ) => {
-  //   const { from, to, firstDataRequest, countBack } = periodParams;
-  //   console.log(
-  //     "[getBars]: Method call",
-  //     symbolInfo,
-  //     resolution,
-  //     from,
-  //     to,
-  //     countBack
-  //   );
-  //   const fromDate = new Date(from * 1000);
-  //   const toDate = new Date(to * 1000);
+  getBars: async (
+    symbolInfo,
+    resolution,
+    periodParams,
+    onHistoryCallback,
+    onErrorCallback
+  ) => {
+    const { from, to, firstDataRequest, countBack } = periodParams;
+    console.log(
+      "[getBars]: Method call",
+      symbolInfo,
+      resolution,
+      from,
+      to,
+      countBack
+    );
+    const fromDate = new Date(from * 1000);
+    const toDate = new Date(to * 1000);
 
-  //   // Convert to readable format
-  //   const start = fromDate.toISOString();
-  //   let end;
-  //   if (firstDataRequest) {
-  //     end = "2024-07-20T14:48:00Z";
-  //   } else {
-  //     end = toDate.toISOString();
-  //   }
+    // Convert to readable format
+    const start = fromDate.toISOString();
+    let end;
+    if (firstDataRequest) {
+      end = getLatestEndDateForGraph();
+    } else {
+      end = toDate.toISOString();
+    }
 
-  //   console.log("start", start);
-  //   console.log("end", end);
+    console.log("start", start);
+    console.log("end", end);
+    console.log("START END", start, end);
+    let allBars = [];
+    let nextPageToken = null;
+    // const start = "2024-01-01T00:00:00Z";
+    // const start = "2024-06-01T00:00:00Z";
+    // const end = "2024-07-20T14:48:00Z";
+    // const end = getLatestEndDate();
 
-  //   let allBars = [];
-  //   let nextPageToken = null;
-  //   // const start = "2024-01-01T00:00:00Z";
-  //   // const start = "2024-06-01T00:00:00Z";
-  //   // const end = "2024-07-20T14:48:00Z";
-  //   // const end = getLatestEndDate();
+    const fetchBars = async (start, end) => {
+      const timeframe = TRADING_VIEW_RESOLUTION_TO_ALPACA[resolution];
+      const encodedSymbol = encodeURIComponent(symbolInfo.name);
+      // const MARKET_URL = ALPACA_API_URL.MARKET;
+      // let API_URL = `${MARKET_URL}/v2/stocks/${encodedSymbol}/bars?start=${start}&end=${end}&timeframe=${timeframe}&limit=1000`;
+      let API_URL = `${BASE_URL}/api/position/bars/${encodedSymbol}?start=${start}&end=${end}&timeframe=${timeframe}&limit=1000`;
+      try {
+        const response = await fetch(API_URL, {});
+        const { data, status } = await response.json();
+        if (status === 0) {
+          await fetchBars(start, end);
+          return;
+        }
+        if (isLargeTimeFrame(resolution)) {
+          if (data.next_page_token == null && !firstDataRequest) {
+            onHistoryCallback([], {
+              noData: true,
+            });
+            return;
+          }
+        } else {
+          if (!response.ok || !data.bars || data.bars.length === 0) {
+            end = start;
+            const date = new Date(start);
+            date.setDate(date.getDate() - 1);
 
-  //   const fetchBars = async (pageToken = null) => {
-  //     const timeframe = TRADING_VIEW_RESOLUTION_TO_ALPACA[resolution];
-  //     const encodedSymbol = encodeURIComponent(symbolInfo.name);
-  //     const MARKET_URL = ALPACA_API_URL.MARKET;
-  //     let API_URL = `${MARKET_URL}/v2/stocks/${encodedSymbol}/bars?start=${start}&end=${end}&timeframe=${timeframe}&limit=1000`;
+            await fetchBars(date.toISOString(), end);
+            // onHistoryCallback([], {
+            //   noData: true,
+            // });
+            return;
+          }
+        }
 
-  //     try {
-  //       const response = await fetch(API_URL, {
-  //         headers: {
-  //           Authorization: ALPACA_AUTH_TOKEN,
-  //         },
-  //       });
-  //       const data = await response.json();
+        const bars = data.bars.map((bar) => ({
+          time: new Date(bar.t).getTime(),
+          low: bar.l,
+          high: bar.h,
+          open: bar.o,
+          close: bar.c,
+          volume: bar.v, // Add volume if available
+        }));
+        onHistoryCallback(bars, {
+          noData: false,
+        });
+        if (firstDataRequest) {
+          lastBarsCache.set(symbolInfo.name, {
+            ...bars[bars.length - 1],
+            time: new Date().getTime(),
+          });
+        }
+        console.log("[Bars length]:", allBars.length);
+      } catch (error) {
+        console.log("error", error.message);
+        console.log("[getBars]: Get error", error);
+        onErrorCallback(error);
+      }
+    };
 
-  //       if (!response.ok || !data.bars || data.bars.length === 0) {
-  //         onHistoryCallback([], {
-  //           noData: true,
-  //         });
-  //         return;
-  //       }
-
-  //       const bars = data.bars.map((bar) => ({
-  //         time: new Date(bar.t).getTime(),
-  //         low: bar.l,
-  //         high: bar.h,
-  //         open: bar.o,
-  //         close: bar.c,
-  //         volume: bar.v, // Add volume if available
-  //       }));
-  //       onHistoryCallback(bars, {
-  //         noData: false,
-  //       });
-  //       if (firstDataRequest) {
-  //         lastBarsCache.set(symbolInfo.name, {
-  //           ...bars[bars.length - 1],
-  //           time: new Date().getTime(),
-  //         });
-  //       }
-  //       console.log("[Bars length]:", allBars.length);
-  //     } catch (error) {
-  //       console.log("error", error.message);
-  //       console.log("[getBars]: Get error", error);
-  //       onErrorCallback(error);
-  //     }
-  //   };
-
-  //   await fetchBars();
-  // },
+    await fetchBars(start, end);
+  },
 
   subscribeBars: (
     symbolInfo,

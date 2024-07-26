@@ -21,6 +21,7 @@ export const SUPPORTED_RESOLUTIONS_VALUES = {
 };
 
 export const isSmallTimeFrame = (t) => ["1", "2", "15", "30", "60"].includes(t);
+export const isLargeTimeFrame = (t) => ["1W", "2W", "1M"].includes(t);
 export const TRADING_VIEW_RESOLUTION_TO_ALPACA = {
   [SUPPORTED_RESOLUTIONS_VALUES._1MINUTE]: "1min",
   [SUPPORTED_RESOLUTIONS_VALUES._2MINUTE]: "2min",
