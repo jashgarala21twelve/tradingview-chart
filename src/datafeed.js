@@ -356,9 +356,9 @@ export default {
       end = toDate.toISOString();
     }
 
-    console.log("start", start);
-    console.log("end", end);
-    console.log("START END", start, end);
+    // console.log("start", start);
+    // console.log("end", end);
+    // console.log("START END", start, end);
     let allBars = [];
     let nextPageToken = null;
     // const start = "2024-01-01T00:00:00Z";
@@ -408,23 +408,26 @@ export default {
           close: bar.c,
           volume: bar.v, // Add volume if available
         }));
-        onHistoryCallback(bars, {
-          noData: false,
-        });
+        console.log("firstDataRequest", firstDataRequest);
+
         if (firstDataRequest) {
           lastBarsCache.set(symbolInfo.name, {
             ...bars[bars.length - 1],
-            // time: new Date().getTime(),
+            time: new Date().getTime(),
           });
+
           // lastBarsCache.set(symbolInfo.name, {
           //   [resolution]: {
           //     ...bars[bars.length - 1],
           //     time: new Date().getTime(),
           //   },
           // });
-          console.log(lastBarsCache, "AAAA");
+          // console.log(lastBarsCache, "AAAA");
         }
-        console.log("[Bars length]:", allBars.length);
+        onHistoryCallback(bars, {
+          noData: false,
+        });
+        // console.log("[Bars length]:", bars.length);
       } catch (error) {
         console.log("error", error.message);
         console.log("[getBars]: Get error", error);
@@ -453,7 +456,7 @@ export default {
     //   new Date(lastBarsCache.get(symbolInfo.name).time).toTimeString(),
     //   new Date(lastBarsCache.get(symbolInfo.name).time).toDateString()
     // );
-    console.log("LASTBAR", lastBarsCache.get(symbolInfo.name));
+    // console.log("LASTBAR", lastBarsCache.get(symbolInfo.name));
     subscribeOnStream(
       symbolInfo,
       resolution,
@@ -469,6 +472,6 @@ export default {
       "[unsubscribeBars]: Method call with subscriberUID:",
       subscriberUID
     );
-    unsubscribeFromStream(subscriberUID);
+    // unsubscribeFromStream(subscriberUID);
   },
 };

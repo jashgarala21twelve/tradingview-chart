@@ -262,3 +262,17 @@ export const generateStaticBars = (resolution, count) => {
 
   return bars;
 };
+export function extractResolution(symbol) {
+  const parts = symbol.split("_#_");
+  if (parts.length === 2) {
+    return parts[1];
+  }
+  throw new Error("Invalid symbol format");
+}
+export function extractAndCombineResolution(symbol, currentResolution) {
+  const parts = symbol.split("_#_");
+  if (parts.length === 2) {
+    return `${parts[0]}_#_${currentResolution}`;
+  }
+  throw new Error("Invalid symbol format");
+}
