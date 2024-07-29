@@ -314,6 +314,7 @@ export function subscribeOnStream(
   onResetCacheNeededCallback,
   lastDailyBar
 ) {
+  console.log("symbolInfopoooo", symbolInfo);
   // console.log("LASSSSSSTTT", lastDailyBar);
   // console.log(
   //   "[LASTBAR]-SUBSCRIBE INSIDE",
@@ -333,7 +334,6 @@ export function subscribeOnStream(
   if (subscriptionItem) {
     // Already subscribed to the channel, use the existing subscription
     subscriptionItem.resolution = resolution;
-    // subscriptionItem.handlers.push(handler);
     subscriptionItem.subscriberUID = subscriberUID;
     subscriptionItem.lastBars = {
       ...subscriptionItem?.lastBars,
@@ -353,6 +353,9 @@ export function subscribeOnStream(
     return;
   }
   subscriptionItem = {
+    name: symbolInfo.name,
+    exchange: symbolInfo.exchange,
+    full_name: symbolInfo.full_name,
     subscriberUID,
     resolution,
     lastBars: {
@@ -366,61 +369,24 @@ export function subscribeOnStream(
     "[subscribeBars]: Subscribe to streaming. Channel:",
     channelString
   );
-  // console.log("CCCCCCCCCC [subscribe] AFTER SET", subscriptionItem);
   socket.emit("subscribe", { type: "trades", symbol: symbolInfo.name });
-  window.isSubscribeCalledOnResolutionChange = true;
   // socket.emit("subscribe", { type: "bars", symbol: symbolInfo.name });
-
-  // const subRequest = {
-  //   action: "SubAdd",
-  //   subs: [channelString],
-  // };
-  // socket.send(JSON.stringify(subRequest));
-
-  ////////////
-  // const parsedSymbol = parseFullSymbol(symbolInfo.full_name);
-  // const channelString = `0~${parsedSymbol.exchange}~${parsedSymbol.fromSymbol}~${parsedSymbol.toSymbol}`;
-  // const handler = {
-  //   id: subscriberUID,
-  //   callback: onRealtimeCallback,
-  // };
-  // let subscriptionItem = channelToSubscription.get(channelString);
-  // if (subscriptionItem) {
-  //   // Already subscribed to the channel, use the existing subscription
-  //   subscriptionItem.handlers.push(handler);
-  //   return;
-  // }
-  // subscriptionItem = {
-  //   subscriberUID,
-  //   resolution,
-  //   lastDailyBar,
-  //   handlers: [handler],
-  // };
-  // channelToSubscription.set(channelString, subscriptionItem);
-  // console.log(
-  //   "[subscribeBars]: Subscribe to streaming. Channel:",
-  //   channelString
-  // );
-  // const subRequest = {
-  //   action: "SubAdd",
-  //   subs: [channelString],
-  // };
-  // socket.send(JSON.stringify(subRequest));
 }
 
 export function unsubscribeFromStream(subscriberUID) {
   // Find a subscription with id === subscriberUID
+  console.log("subscriptionItemmmmm", subscriberUID);
   for (const channelString of channelToSubscription.keys()) {
+    console.log("channelString", channelString);
     const subscriptionItem = channelToSubscription.get(channelString);
-    console.log("subscriptionItemmmm", subscriptionItem);
     const handlerIndex = subscriptionItem.handlers.findIndex(
       (handler) => handler.id === subscriberUID
     );
-
+    console.log(subscriptionItem, "subscriptionItemmmmm Before");
     if (handlerIndex !== -1) {
       // Remove from handlers
       subscriptionItem.handlers.splice(handlerIndex, 1);
-
+      console.log(subscriptionItem, "subscriptionItemmmmm After");
       if (subscriptionItem.handlers.length === 0) {
         // Unsubscribe from the channel if it was the last handler
         console.log(
@@ -432,6 +398,10 @@ export function unsubscribeFromStream(subscriberUID) {
         //   subs: [channelString],
         // };
         // socket.send(JSON.stringify(subRequest));
+        socket.emit("unsubscribe", {
+          type: "trades",
+          symbol: subscriptionItem.name,
+        });
         channelToSubscription.delete(channelString);
         break;
       }

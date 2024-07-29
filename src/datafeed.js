@@ -449,14 +449,7 @@ export default {
       "[subscribeBars]: Method call with subscriberUID:",
       subscriberUID
     );
-    // console.log("subscribebars", typeof symbolInfo.name);
-    // console.log(lastBarsCache, "lastBar");
-    // console.log(
-    //   "[LASTBAR]-subscribeBarsFunction",
-    //   new Date(lastBarsCache.get(symbolInfo.name).time).toTimeString(),
-    //   new Date(lastBarsCache.get(symbolInfo.name).time).toDateString()
-    // );
-    // console.log("LASTBAR", lastBarsCache.get(symbolInfo.name));
+
     subscribeOnStream(
       symbolInfo,
       resolution,
@@ -472,6 +465,6 @@ export default {
       "[unsubscribeBars]: Method call with subscriberUID:",
       subscriberUID
     );
-    // unsubscribeFromStream(subscriberUID);
+    unsubscribeFromStream(subscriberUID);
   },
 };
