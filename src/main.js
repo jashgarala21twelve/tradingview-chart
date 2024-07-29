@@ -30,8 +30,10 @@ window.tvWidget = new TradingView.widget({
   disabled_features: ["header_symbol_search", "symbol_search_hot_key"],
   overrides: {
     "mainSeriesProperties.showCountdown": true, // Show countdown
+    // "mainSeriesProperties.style": 0, // Setting the default chart type to candlestick
   },
   theme: theme,
+  timezone: "America/New_York", // Set the default timezone
   // debug: true,
 });
 window.activeResolution = DEFAULT_RESOLUTION;
