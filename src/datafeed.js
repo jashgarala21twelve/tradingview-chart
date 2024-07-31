@@ -138,10 +138,10 @@ export default {
       name: symbolItem.symbol,
       description: symbolItem.description,
       type: symbolItem.type,
-      session: "0930-1600", // Regular market hours
-      timezone: "America/New_York",
-      // session: "24x7",
-      // timezone: "Etc/UTC",
+      // session: "0930-1600", // Regular market hours
+      // timezone: "America/New_York",
+      session: "24x7",
+      timezone: "Etc/UTC",
       exchange: symbolItem.exchange,
       minmov: 1,
       pricescale: 100,

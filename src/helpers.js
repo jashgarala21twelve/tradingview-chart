@@ -133,9 +133,11 @@ export function getNextBarTime(time, timeframe) {
       date.setHours(date.getHours() + 3);
       break;
     case SUPPORTED_RESOLUTIONS_VALUES._4HOURS:
-      date.setDate(date.getDate() + 4);
+      date.setHours(date.getHours() + 4);
       break;
-
+    case SUPPORTED_RESOLUTIONS_VALUES._1DAY:
+      date.setDate(date.getDate() + 1);
+      break;
     case SUPPORTED_RESOLUTIONS_VALUES._1WEEK:
       date.setDate(date.getDate() + 7);
       break;

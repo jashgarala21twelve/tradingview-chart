@@ -10,7 +10,7 @@ import {
 
 // http://prospuh.io:2001
 // http://localhost:5000
-const socket = io("http://prospuh.io:2001");
+const socket = io("http://localhost:5000");
 const channelToSubscription = new Map();
 
 socket.on("connect", () => {
