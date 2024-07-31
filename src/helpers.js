@@ -1,4 +1,8 @@
-import { BASE_URL, SUPPORTED_RESOLUTIONS_VALUES } from "./constant.js";
+import {
+  ALPACA_API_URL,
+  BASE_URL,
+  SUPPORTED_RESOLUTIONS_VALUES,
+} from "./constant.js";
 
 const makeApiCall = async (method, url, headers) => {
   try {
@@ -8,17 +12,20 @@ const makeApiCall = async (method, url, headers) => {
     return { data: null, error: err.message };
   }
 };
-// export async function makeAlpacaMarketApiRequest(method, path) {
-//   try {
-//     const MARKET_URL = ALPACA_API_URL.MARKET + "/v2/" + path;
-//     const { data: alpacaData, error } = await makeApiCall(method, MARKET_URL, {
-//       Authorization: ALPACA_AUTH_TOKEN,
-//     });
-//     return alpacaData;
-//   } catch (error) {
-//     throw new Error(`CryptoCompare request error: ${error.status}`);
-//   }
-// }
+export async function makeAlpacaMarketApiRequest(method, path) {
+  try {
+    const MARKET_URL = ALPACA_API_URL.MARKET + "/v2/" + path;
+    const { data: alpacaData, error } = await makeApiCall(method, MARKET_URL, {
+      Authorization:
+        "Basic Q0szOTJGRFE3NDFGSDdaNkY4Ulk6em5rOHQxMEJTc292UHJxaThoZDQ1aGNiUXRuakxjaDFHM0x1cHlQOA==",
+    });
+    console.log("alpacaData", alpacaData);
+    return alpacaData;
+  } catch (error) {
+    console.log("Errorrrrr", error.message);
+    throw new Error(`CryptoCompare request error: ${error.status}`);
+  }
+}
 // export async function makeAlpacaBrokerApiRequest(method, path) {
 //   try {
 //     const BROKER_URL = ALPACA_API_URL.BROKER + "/v1/" + path;
@@ -53,7 +60,7 @@ export const fetchAllHistoricalAlpacaData = async (baseUrl) => {
 
     // Update the URL with the new page token
     url = `${baseUrl}&page_token=${next_page_token}`;
-  
+    console.log(url, "url");
   }
 
   return allAlpacaData;
@@ -62,6 +69,7 @@ export const fetchAllHistoricalAlpacaData = async (baseUrl) => {
 export const getLatestBar = async (symbol) => {
   let API_URL = `stocks/${symbol}/bars/latest`;
   const data = await makeAlpacaMarketApiRequest("get", API_URL);
+
   return data;
 };
 
@@ -115,11 +123,17 @@ export function getNextBarTime(time, timeframe) {
     case SUPPORTED_RESOLUTIONS_VALUES._30MINUTE:
       date.setMinutes(date.getMinutes() + 30);
       break;
-    case SUPPORTED_RESOLUTIONS_VALUES._60MINUTE:
+    case SUPPORTED_RESOLUTIONS_VALUES._1HOUR:
       date.setHours(date.getHours() + 1);
       break;
-    case SUPPORTED_RESOLUTIONS_VALUES._6HOURS:
-      date.setHours(date.getHours() + 6);
+    case SUPPORTED_RESOLUTIONS_VALUES._2HOURS:
+      date.setHours(date.getHours() + 2);
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._3HOURS:
+      date.setHours(date.getHours() + 3);
+      break;
+    case SUPPORTED_RESOLUTIONS_VALUES._4HOURS:
+      date.setHours(date.getHours() + 4);
       break;
     case SUPPORTED_RESOLUTIONS_VALUES._1DAY:
       date.setDate(date.getDate() + 1);
@@ -262,3 +276,34 @@ export const generateStaticBars = (resolution, count) => {
 
   return bars;
 };
+export function extractResolution(symbol) {
+  const parts = symbol.split("_#_");
+  if (parts.length === 2) {
+    return parts[1];
+  }
+  throw new Error("Invalid symbol format");
+}
+export function extractAndCombineResolution(symbol, currentResolution) {
+  const parts = symbol.split("_#_");
+  if (parts.length === 2) {
+    return `${parts[0]}_#_${currentResolution}`;
+  }
+  throw new Error("Invalid symbol format");
+}
+
+export function checkUTCTime() {
+  const startUTCTime = "13:30";
+  const endUTCTime = "20:00";
+
+  const now = new Date();
+  const currentUTCTime = now.getUTCHours() * 60 + now.getUTCMinutes(); // current time in minutes
+
+  // Convert startUTCTime and endUTCTime to minutes
+  const [startHours, startMinutes] = startUTCTime.split(":").map(Number);
+  const [endHours, endMinutes] = endUTCTime.split(":").map(Number);
+
+  const startTotalMinutes = startHours * 60 + startMinutes;
+  const endTotalMinutes = endHours * 60 + endMinutes;
+
+  return currentUTCTime > startTotalMinutes && currentUTCTime < endTotalMinutes;
+}
