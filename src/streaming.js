@@ -6,11 +6,12 @@ import {
   isSameDay,
   extractResolution,
   extractAndCombineResolution,
+  checkUTCTime,
 } from "./helpers.js";
 
 // http://prospuh.io:2001
 // http://localhost:5000
-const socket = io("http://prospuh.io:2001");
+const socket = io("http://localhost:5000");
 const channelToSubscription = new Map();
 
 socket.on("connect", () => {
@@ -369,7 +370,10 @@ export function subscribeOnStream(
     "[subscribeBars]: Subscribe to streaming. Channel:",
     channelString
   );
-  socket.emit("subscribe", { type: "trades", symbol: symbolInfo.name });
+  if (checkUTCTime()) {
+    console.log("Current UTC time is between startUTCTime and endUTCTime.");
+    socket.emit("subscribe", { type: "trades", symbol: symbolInfo.name });
+  }
   // socket.emit("subscribe", { type: "bars", symbol: symbolInfo.name });
 }
 

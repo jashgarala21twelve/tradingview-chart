@@ -288,3 +288,22 @@ export function extractAndCombineResolution(symbol, currentResolution) {
   }
   throw new Error("Invalid symbol format");
 }
+
+export function checkUTCTime() {
+
+  const startUTCTime = "13:30";
+  const endUTCTime = "20:00";
+
+  const now = new Date();
+  const currentUTCTime = now.getUTCHours() * 60 + now.getUTCMinutes(); // current time in minutes
+
+  // Convert startUTCTime and endUTCTime to minutes
+  const [startHours, startMinutes] = startUTCTime.split(":").map(Number);
+  const [endHours, endMinutes] = endUTCTime.split(":").map(Number);
+
+  const startTotalMinutes = startHours * 60 + startMinutes;
+  const endTotalMinutes = endHours * 60 + endMinutes;
+
+
+  return currentUTCTime > startTotalMinutes && currentUTCTime < endTotalMinutes;
+}
