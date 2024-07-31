@@ -370,16 +370,16 @@ export function subscribeOnStream(
     "[subscribeBars]: Subscribe to streaming. Channel:",
     channelString
   );
-  if (checkUTCTime()) {
+  // if (checkUTCTime()) {
     console.log("Current UTC time is between startUTCTime and endUTCTime.");
     socket.emit("subscribe", { type: "trades", symbol: symbolInfo.name });
-  }
+  // }
   // socket.emit("subscribe", { type: "bars", symbol: symbolInfo.name });
 }
 
 export function unsubscribeFromStream(subscriberUID) {
   // Find a subscription with id === subscriberUID
-  console.log("subscriptionItemmmmm", subscriberUID);
+
   for (const channelString of channelToSubscription.keys()) {
     console.log("channelString", channelString);
     const subscriptionItem = channelToSubscription.get(channelString);

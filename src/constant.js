@@ -1,12 +1,11 @@
 export const ALPACA_API_URL = {
-  // BROKER: "https://broker-api.sandbox.alpaca.markets",
-  // BROKER: "https://broker-api.alpaca.markets",
-  // MARKET: "https://data.sandbox.alpaca.markets",
-  // MARKET: "https://data.alpaca.markets",
+  BROKER: "https://broker-api.sandbox.alpaca.markets",
+  BROKER: "https://broker-api.alpaca.markets",
+  MARKET: "https://data.sandbox.alpaca.markets",
+  MARKET: "https://data.alpaca.markets",
   BASE_URL: "https://prospuh.io",
 };
 export const BASE_URL = "https://prospuh.io";
-
 export const SUPPORTED_RESOLUTIONS_VALUES = {
   _1MINUTE: "1",
   _2MINUTE: "2",
@@ -43,3 +42,21 @@ export const DEFAULT_RESOLUTION = SUPPORTED_RESOLUTIONS_VALUES._1HOUR;
 export const SUPPORTED_RESOLUTIONS = Object.values(
   SUPPORTED_RESOLUTIONS_VALUES
 );
+
+export const ChartTypes = {
+  Bar: 0,
+  Candle: 1,
+  Line: 2,
+  Area: 3,
+  HeikinAshi: 8,
+  HollowCandle: 9,
+  Baseline: 10,
+  HiLo: 12,
+  Column: 13,
+  LineWithMarkers: 14,
+  Stepline: 15,
+  HLCArea: 16,
+};
+
+export const isValidChartType = (chart) =>
+  Object.values(ChartTypes).includes(chart);

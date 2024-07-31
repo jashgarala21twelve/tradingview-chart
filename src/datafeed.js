@@ -138,10 +138,10 @@ export default {
       name: symbolItem.symbol,
       description: symbolItem.description,
       type: symbolItem.type,
-      // session: "0930-1600", // Regular market hours
-      // timezone: "America/New_York",
-      session: "24x7",
-      timezone: "Etc/UTC",
+      session: "0930-1600", // Regular market hours
+      timezone: "America/New_York",
+      // session: "24x7",
+      // timezone: "Etc/UTC",
       exchange: symbolItem.exchange,
       minmov: 1,
       pricescale: 100,
@@ -529,12 +529,18 @@ export default {
         allBars = allBars.concat(bars);
         if (firstDataRequest) {
           // const latestBarData = await getLatestBar(symbolInfo.name);
-          //           // const latestBar = latestBarData?.bar;
+          // console.log("latestBarData", latestBarData);
+          // const latestBar = latestBarData?.bar;
           lastBarsCache.set(symbolInfo.name, {
             ...bars[bars.length - 1],
             time: new Date().getTime(),
+            // low: latestBar.l,
+            // high: latestBar.h,
+            // open: latestBar.o,
+            // close: latestBar.c,
+            // volume: latestBar.v, // Add volume if available
           });
-
+          console.log("lastBAR", { ...bars[bars.length - 1] });
           // lastBarsCache.set(symbolInfo.name, {
           //   [resolution]: {
           //     ...bars[bars.length - 1],
