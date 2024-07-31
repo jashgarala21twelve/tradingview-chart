@@ -23,11 +23,9 @@ const isAreaChart = +chartType === ChartTypes.Area;
 
 /// Disable Features ////
 let disabledFeatures = [
-  // "header_resolutions",
   "symbol_search_hot_key",
   "use_localstorage_for_settings",
   "header_symbol_search",
-  "legend_widget",
   "header_compare",
 ];
 let disabledFeaturesInAreaChart = ["left_toolbar", "header_widget"];
@@ -37,6 +35,15 @@ disabledFeatures = isAreaChart
 
 /// Disable Features  End ////
 
+/////// Overrides Start /////
+const overrides = {
+  "mainSeriesProperties.showCountdown": true, // Show countdown
+  "mainSeriesProperties.style": chartType, // Setting the default chart type to candlestick
+  "paneProperties.legendProperties.showSeriesTitle": false,
+  "scalesProperties.showSymbolLabels": true,
+};
+/////// Overrides End /////
+
 window.tvWidget = new TradingView.widget({
   symbol: symbol, // Default symbol
   interval: interval, // Default interval
@@ -45,10 +52,8 @@ window.tvWidget = new TradingView.widget({
   datafeed: Datafeed,
   library_path: "../charting_library/",
   disabled_features: disabledFeatures,
-  overrides: {
-    "mainSeriesProperties.showCountdown": true, // Show countdown
-    "mainSeriesProperties.style": chartType, // Setting the default chart type to candlestick
-  },
+  overrides: overrides,
+  enabled_features: ["header_ohlc"], // Enable OHLC values in the header
 
   theme: theme,
   timezone: "America/New_York", // Set the default timezone
